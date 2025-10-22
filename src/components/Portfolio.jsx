@@ -130,7 +130,7 @@ const Portfolio = () => {
                   </Link>
                   <div className="p-4 md:p-6">
                     <h3 className="text-lg md:text-xl font-bold text-white mb-2">
-                      ∗ {project.title}
+                      {project.title}
                     </h3>
                     <p className="text-xs md:text-sm text-light mb-2">{project.date}</p>
                     <span className={`inline-block px-2 md:px-3 py-1 rounded-full text-xs font-semibold ${
