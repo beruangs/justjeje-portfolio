@@ -1,0 +1,46 @@
+{
+  "fullname": "Janoko Jentayubronto",
+  "nickname": "Jeje",
+  "title": "Video Editor & Videographer",
+  "age": "18 y.o",
+  "city": "Surakarta, Indonesia",
+  "freelance": "Available",
+  "profileImage": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/home/profile.PNG",
+  "about": "Saya Janoko Jentayubronto, juga dikenal sebagai Jeje, seorang editor video dan videografer yang berbasis di Surakarta. Saya memiliki lima tahun pengalaman di bidang penyuntingan video dan sinematografi. Saat ini saya sedang menempuh pendidikan Film & Televisi di ISI Surakarta. Saya mahir menggunakan kamera Sony, perangkat lunak Davinci Resolve, dan Adobe Creative Suite. Sebelumnya, saya bekerja di Ceria Production/BMC Production sebagai Sinematografer dan Editor Video. Saya juga magang selama empat bulan di Sinema Warga, sebuah rumah produksi lokal yang berfokus dalam film dokumenter dan penyelenggara pemutaran film (salah satunya Solo Film Festival). Saat ini saya bekerja dengan tim produksi baru, LOWO Pictures, untuk menghasilkan konten yang kreatif dan berkualitas tinggi.",
+  "contact": {
+    "instagram": "https://instagram.com/justjejee._/",
+    "youtube": "https://youtube.com/@justjejee._/",
+    "tiktok": "https://www.tiktok.com/@justjejee._/",
+    "email": "jentayubronto@gmail.com",
+    "whatsapp": "https://wa.me/6285717026860"
+  },
+  "stats": {
+    "years": 6,
+    "projects": 45,
+    "events": 7
+  },
+  "skills": [
+    { "name": "Davinci Resolve", "level": 100 },
+    { "name": "Adobe Premiere Pro", "level": 100 },
+    { "name": "Adobe After Effects", "level": 40 },
+    { "name": "Adobe Photoshop", "level": 70 },
+    { "name": "Operating Camera", "level": 100 }
+  ],
+  "gear": [
+    {
+      "name": "Macbook Pro M2",
+      "type": "Laptop",
+      "image": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/gear/laptop-macbook.png"
+    },
+    {
+      "name": "Sony A6400",
+      "type": "Camera",
+      "image": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/gear/camera-sonya64.png"
+    },
+    {
+      "name": "Sony 35mm F1.8",
+      "type": "Lens",
+      "image": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/gear/lens-sony35f18.png"
+    }
+  ]
+}

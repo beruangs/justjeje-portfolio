@@ -1,0 +1,11 @@
+# robots.txt for Just-Jeje Portfolio Website
+# https://justjeje.vercel.app
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://justjeje.vercel.app/sitemap.xml
+
+# Crawl-delay (optional, helps with server load)
+Crawl-delay: 1

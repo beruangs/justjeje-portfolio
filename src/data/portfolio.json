@@ -1,0 +1,483 @@
+[
+  {
+    "id": "web-movie",
+    "title": "Film WeB",
+    "date": "Mar, 2024",
+    "category": "film",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/film/WeB%20Movie.png",
+    "youtubeUrl": "https://youtu.be/me2z2ozlpEA",
+    "detailPage": "https://webthemovie.netlify.app/",
+    "description": "Film WeB adalah sebuah karya film pendek yang diproduksi dengan tema dan cerita yang menarik.",
+    "pinned": "yes",
+    "projectInfo": {
+      "name": "Film WeB",
+      "categoryFull": "Short Film",
+      "role": "Producer, Editor, Colorist",
+      "fest": "-"
+    }
+  },
+  {
+    "id": "batwoska-memories",
+    "title": "The Batwoska 25's Memories",
+    "date": "May 8, 2025",
+    "category": "film",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/film/Batwoska%20Memories%20Movie.png",
+    "youtubeUrl": "https://youtu.be/8rtj3fDuvw8?si=nhPoAjziAUskxY-d",
+    "description": "Film dokumenter tentang kenangan Batwoska 25.",
+    "projectInfo": {
+      "name": "The Batwoska 25's Memories",
+      "categoryFull": "Short Film",
+      "role": "Producer, Offline Editor, Online Editor, Colorist",
+      "fest": "-"
+    },
+    "pinned": "yes"
+  },
+  {
+    "id": "film-nantang",
+    "title": "Film Nantang",
+    "date": "March 7, 2024",
+    "category": "film",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/film/Nantang%20Movie.png",
+    "youtubeUrl": "https://youtu.be/iDEqbjIV18c",
+    "description": "Film pendek dengan tema tantangan kehidupan.",
+    "projectInfo": {
+      "name": "Film Nantang",
+      "categoryFull": "Short Film",
+      "role": "Director of Photography, Editor, Colorist",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "film-apus",
+    "title": "Film Apus",
+    "date": "October 9, 2023",
+    "category": "film",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/film/Apus%20Movie.png",
+    "youtubeUrl": "https://youtu.be/RMLLd3zCtmA",
+    "description": "Film pendek produksi Ceria Production.",
+    "projectInfo": {
+      "name": "Film Apus",
+      "categoryFull": "Short Film",
+      "role": "Director of Photography, Editor, Colorist",
+      "fest": "Hakordia 2023"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "wedding-natasya-aditya",
+    "title": "Wedding Natasya & Aditya",
+    "date": "December 12, 2024",
+    "category": "commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/wedding/Thumbnail%20Project%20Wedding%20Natasya%20%26%20Aditya.png",
+    "youtubeUrl": "https://youtu.be/-can1H2JG1c",
+    "description": "Project wedding commission for Natasya & Aditya.",
+    "projectInfo": {
+      "name": "Project Wedding Natasya & Aditya",
+      "categoryFull": "Commission",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "film-pilihan",
+    "title": "Film Pilihan",
+    "date": "July 12, 2024",
+    "category": "film",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/film/Pilihan%20Movie.png",
+    "youtubeUrl": "https://youtu.be/sY1_pevvaLw?si=VCHKQfe6zuNoY0lc",
+    "description": "Film tentang pilihan hidup.",
+    "projectInfo": {
+      "name": "Film Pilihan",
+      "categoryFull": "Short Film",
+      "role": "Director of Photography, Editor, Colorist",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "wedding-putri-nanang",
+    "title": "Wedding Putri & Nanang",
+    "date": "May 24, 2024",
+    "category": "commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/wedding/Wedding%20Putri%20%26%20Nanang.png",
+    "youtubeUrl": "https://youtu.be/e9Es70GU8Ug",
+    "description": "Wedding videography commission for Putri & Nanang.",
+    "projectInfo": {
+      "name": "Wedding Putri & Nanang",
+      "categoryFull": "Commission",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "film-renung",
+    "title": "Film Renung",
+    "date": "February 27, 2024",
+    "category": "film",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/film/Renung%20Movie.png",
+    "youtubeUrl": "https://youtu.be/_41il0Y6mh4",
+    "description": "Film perenungan kehidupan.",
+    "projectInfo": {
+      "name": "Film Renung",
+      "categoryFull": "Short Film",
+      "role": "Director of Photography, Editor, Colorist",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "wedding-aulia-ramadhan",
+    "title": "Wedding Aulia & Ramadhan",
+    "date": "February 24, 2024",
+    "category": "commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/wedding/Wedding%20Aulia%20%26%20Ramadhan.png",
+    "youtubeUrl": "https://youtu.be/LQVSuvjeYRs",
+    "description": "Wedding videography for Aulia & Ramadhan.",
+    "projectInfo": {
+      "name": "Wedding Aulia & Ramadhan",
+      "categoryFull": "Commission",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "pengilon-camp",
+    "title": "Pengilon Camp",
+    "date": "January 3, 2024",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Pengilon%20Camp.png",
+    "youtubeUrl": "https://youtu.be/2_9Ha7cOkU0",
+    "description": "Dokumentasi kegiatan camping di Pengilon.",
+    "projectInfo": {
+      "name": "Pengilon Camp",
+      "categoryFull": "Cinematic",
+      "role": "Footage, Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "film-wedang-uwuh",
+    "title": "Film Wedang Uwuh",
+    "date": "August 20, 2023",
+    "category": "film",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/film/Wedang%20Uwuh%20Movie.png",
+    "youtubeUrl": "https://youtu.be/vyLTKM2BUNg",
+    "description": "Film pendek tentang tradisi Wedang Uwuh.",
+    "projectInfo": {
+      "name": "Film Wedang Uwuh",
+      "categoryFull": "Short Film",
+      "role": "Director of Photography, Editor",
+      "fest": "Hicefodion 2023"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "simulasi-gempa",
+    "title": "Simulasi Gempa SMPN27 Surakarta",
+    "date": "April 16, 2023",
+    "category": "commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Simulasi%20Mitigasi%20Gempa%20By%20SMPN27SKA.png",
+    "youtubeUrl": "https://youtu.be/Fpt_MOHpA3A",
+    "description": "Dokumentasi simulasi mitigasi gempa SMPN 27 Surakarta x BPBD.",
+    "projectInfo": {
+      "name": "Simulasi Mitigasi Gempa SMPN 27 Surakarta x BPBD Kota Surakarta",
+      "categoryFull": "Commission",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "mars-bnn",
+    "title": "Mars BNN by SMPN27 Surakarta",
+    "date": "February 13, 2023",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Mars%20BNN%20By%20SMPN27SKA.png",
+    "youtubeUrl": "https://youtu.be/9eOiIhFWeYA",
+    "description": "Music video Mars BNN oleh SMPN27 Surakarta.",
+    "projectInfo": {
+      "name": "Mars BNN by SMPN27 Surakarta",
+      "categoryFull": "Cinematic",
+      "role": "Footage, Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "hut-purbayan",
+    "title": "HUT Desa Purbayan",
+    "date": "December 23, 2022",
+    "category": "commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/HUT%20Purbayan%20Ke-74.png",
+    "youtubeUrl": "https://youtu.be/334QL0AZO8k",
+    "description": "Dokumentasi HUT Desa Purbayan Ke-74.",
+    "projectInfo": {
+      "name": "HUT Desa Purbayan Ke-74",
+      "categoryFull": "Commission",
+      "role": "Video Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "hari-guru",
+    "title": "Hari Guru",
+    "date": "December 8, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Hari%20Guru.png",
+    "youtubeUrl": "https://youtu.be/eZCBzM5Q8LU",
+    "description": "Video perayaan Hari Guru.",
+    "projectInfo": {
+      "name": "Hari Guru",
+      "categoryFull": "Cinematic",
+      "role": "Footage, Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "perpustakaan-cemerlang",
+    "title": "Perpustakaan Cemerlang",
+    "date": "November 15, 2022",
+    "category": "commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Perpustakaan%20Cemerlang.png",
+    "youtubeUrl": "https://youtu.be/2LQsZ-YMylA",
+    "description": "Dokumentasi Perpustakaan Cemerlang.",
+    "projectInfo": {
+      "name": "Perpustakaan Cemerlang",
+      "categoryFull": "Commission",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "going-home",
+    "title": "Going Home (Rain)",
+    "date": "November 13, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Going%20Home.png",
+    "youtubeUrl": "https://youtu.be/Z3ySDIJYhvk",
+    "description": "Cinematic video perjalanan pulang di hari hujan.",
+    "projectInfo": {
+      "name": "Going Home",
+      "categoryFull": "Cinematic",
+      "role": "Footage, Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "senam-kreasi",
+    "title": "P5 Senam Kreasi",
+    "date": "November 5, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/P5%20Senam%20Kreasi.png",
+    "youtubeUrl": "https://youtu.be/9ew_7KotvCI/",
+    "description": "Dokumentasi P5 Senam Kreasi.",
+    "projectInfo": {
+      "name": "P5 Senam Kreasi Berkarakter",
+      "categoryFull": "Cinematic",
+      "role": "Footage, Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "kreasso-2022",
+    "title": "KREASSO 2022",
+    "date": "October 17, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Kreasso2022.png",
+    "youtubeUrl": "https://www.youtube.com/watch?v=NaUfiqUUO4o/",
+    "description": "Dokumentasi event KREASSO 2022.",
+    "projectInfo": {
+      "name": "KREASSO",
+      "categoryFull": "Cinematic",
+      "role": "Footage, Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "hsis",
+    "title": "HSIS",
+    "date": "October 6, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/High%20School%20in%20Surakarta.png",
+    "youtubeUrl": "https://www.youtube.com/watch?v=kayUvX9XmHo/",
+    "description": "High School in Surakarta - Cinematic video.",
+    "projectInfo": {
+      "name": "High School in Surakarta",
+      "categoryFull": "Cinematic",
+      "role": "Footage, Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "rahasia-perempuan",
+    "title": "Rahasia Perempuan",
+    "date": "September 23, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Rahasia%20Perempuan.png",
+    "youtubeUrl": "",
+    "description": "Video cinematic tentang rahasia perempuan.",
+    "projectInfo": {
+      "name": "Rahasia Perempuan",
+      "categoryFull": "Cinematic",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "story-of-us",
+    "title": "Story of Us",
+    "date": "September 6, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Story%20of%20Us.png",
+    "youtubeUrl": "https://www.youtube.com/watch?v=g0kViy2MqfI",
+    "description": "Cinematic video Story of Us.",
+    "projectInfo": {
+      "name": "Story of Us",
+      "categoryFull": "Cinematic",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "snap",
+    "title": "SNAP",
+    "date": "September 2, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/SNAP.png",
+    "youtubeUrl": "https://www.youtube.com/watch?v=2NY8228XwjY",
+    "description": "SNAP - Creative cinematic video.",
+    "projectInfo": {
+      "name": "SNAP",
+      "categoryFull": "Cinematic",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "tiba-tiba",
+    "title": "Tiba-Tiba",
+    "date": "September 1, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Tiba%20Tiba.png",
+    "youtubeUrl": "https://www.youtube.com/watch?v=ADgDt5O1xTc",
+    "description": "Video cinematic Tiba-Tiba.",
+    "projectInfo": {
+      "name": "Tiba-Tiba",
+      "categoryFull": "Cinematic",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "left-and-right",
+    "title": "Left and Right",
+    "date": "August 21, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Left%20and%20Right.png",
+    "youtubeUrl": "https://www.youtube.com/watch?v=YzgXRBz_0m0",
+    "description": "Cinematic video Left and Right.",
+    "projectInfo": {
+      "name": "Left and Right",
+      "categoryFull": "Cinematic",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "sakura",
+    "title": "Sakura",
+    "date": "July 24, 2022",
+    "category": "non-commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/post/Sakura.png",
+    "youtubeUrl": "https://www.youtube.com/watch?v=tAM4jk2Edng",
+    "description": "Cinematic video Sakura.",
+    "projectInfo": {
+      "name": "Sakura",
+      "categoryFull": "Cinematic",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "ayo-rukun-mv",
+    "title": "Ayo Rukun (MV)",
+    "date": "November 18, 2023",
+    "category": "film",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/film/Ayo%20Rukun%20MV.png",
+    "youtubeUrl": "https://youtu.be/qP1AmDRhoas",
+    "description": "Music Video Ayo Rukun by SMK Batik 2.",
+    "projectInfo": {
+      "name": "Ayo Rukun (MV) by SMK Batik 2",
+      "categoryFull": "Music Video",
+      "role": "Director of Photography, Editor",
+      "fest": "Lomba Cover Jingle Ayo Rukun"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "ngunduh-mantu-arumgilang",
+    "title": "Ngunduh Mantu Arum & Gilang",
+    "date": "December 18, 2022",
+    "category": "commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/wedding/Ngunduh%20Mantu%20Arum%20%26%20Gilang.png",
+    "youtubeUrl": "https://youtu.be/MkJNWIl5eNs",
+    "description": "Ngunduh Mantu Arum & Gilang.",
+    "projectInfo": {
+      "name": "Ngunduh Mantu Arum & Gilang",
+      "categoryFull": "Commission",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "wedding-arum-gilang",
+    "title": "Wedding Arum & Gilang",
+    "date": "November 20, 2022",
+    "category": "commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/wedding/Wedding%20Arum%20%26%20Gilang.png",
+    "youtubeUrl": "https://youtu.be/n-CjpPmr02I",
+    "description": "Wedding Arum & Gilang.",
+    "projectInfo": {
+      "name": "Wedding Arum Gilang",
+      "categoryFull": "Commission",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  },
+  {
+    "id": "wedding-ina-arthur",
+    "title": "Wedding Ina & Arthur",
+    "date": "May 7, 2022",
+    "category": "commission",
+    "thumbnail": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/thumbnail/wedding/Wedding%20Ina%20%26%20Arthur.png",
+    "youtubeUrl": "https://youtu.be/fZ_EKRQYwgs",
+    "description": "Wedding Ina & Arthur.",
+    "projectInfo": {
+      "name": "Wedding Ina & Arthur",
+      "categoryFull": "Commission",
+      "role": "Editor",
+      "fest": "-"
+    },
+    "pinned": ""
+  }
+]

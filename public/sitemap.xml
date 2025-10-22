@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Home Page -->
+  <url>
+    <loc>https://justjeje.vercel.app/</loc>
+    <lastmod>2025-10-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Project Pages -->
+  <url>
+    <loc>https://justjeje.vercel.app/project/web-movie</loc>
+    <lastmod>2024-03-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/batwoska-memories</loc>
+    <lastmod>2025-05-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/film-nantang</loc>
+    <lastmod>2024-03-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/film-apus</loc>
+    <lastmod>2023-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/wedding-natasya-aditya</loc>
+    <lastmod>2024-12-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/film-pilihan</loc>
+    <lastmod>2024-07-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/wedding-putri-nanang</loc>
+    <lastmod>2024-05-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/film-renung</loc>
+    <lastmod>2024-02-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/wedding-aulia-ramadhan</loc>
+    <lastmod>2024-02-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/pengilon-camp</loc>
+    <lastmod>2024-01-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/film-wedang-uwuh</loc>
+    <lastmod>2023-08-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://justjeje.vercel.app/project/ayo-rukun-mv</loc>
+    <lastmod>2023-11-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>
