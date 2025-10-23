@@ -29,7 +29,7 @@ const PhotoCarousel = ({ photos }) => {
       <img
         src={photoArray[currentIndex]}
         alt={`Photo ${currentIndex + 1}`}
-        className="absolute top-0 left-0 w-full h-full object-cover"
+        className="absolute top-0 left-0 w-full h-full object-contain"
       />
 
       {/* Navigation Arrows */}
@@ -37,33 +37,33 @@ const PhotoCarousel = ({ photos }) => {
         <>
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all z-10"
+            className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 md:p-3 rounded-full transition-all z-10 backdrop-blur-sm"
             aria-label="Previous photo"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all z-10"
+            className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 md:p-3 rounded-full transition-all z-10 backdrop-blur-sm"
             aria-label="Next photo"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
 
           {/* Dots Indicator */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 md:gap-2 z-10">
             {photoArray.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
+                className={`h-1.5 md:h-2 rounded-full transition-all ${
                   index === currentIndex 
-                    ? 'bg-secondary w-8' 
-                    : 'bg-white/50 hover:bg-white/70'
+                    ? 'bg-secondary w-6 md:w-8' 
+                    : 'bg-white/50 hover:bg-white/70 w-1.5 md:w-2'
                 }`}
                 aria-label={`Go to photo ${index + 1}`}
               />
@@ -272,15 +272,14 @@ const ProjectDetail = () => {
                   </motion.a>
                 )}
 
-                <Link to="/">
-                  <motion.button
-                    className="w-full mt-4 px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    ← Back to Portfolio
-                  </motion.button>
-                </Link>
+                <motion.button
+                  onClick={() => navigate(-1)}
+                  className="w-full mt-4 px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  ← Back to Portfolio
+                </motion.button>
               </div>
             </motion.div>
           </div>
