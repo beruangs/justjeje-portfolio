@@ -4,6 +4,77 @@ import { motion } from 'framer-motion';
 import portfolioData from '../data/portfolio.json';
 import SEO from '../components/SEO';
 
+// Carousel Component
+const PhotoCarousel = ({ photos }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const photoArray = [photos.photo1, photos.photo2, photos.photo3].filter(Boolean);
+
+  if (photoArray.length === 0) return null;
+
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? photoArray.length - 1 : prevIndex - 1
+    );
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === photoArray.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  return (
+    <div className="relative pb-[56.25%] h-0 rounded-lg overflow-hidden shadow-2xl bg-gray-800">
+      {/* Current Photo */}
+      <img
+        src={photoArray[currentIndex]}
+        alt={`Photo ${currentIndex + 1}`}
+        className="absolute top-0 left-0 w-full h-full object-cover"
+      />
+
+      {/* Navigation Arrows */}
+      {photoArray.length > 1 && (
+        <>
+          <button
+            onClick={goToPrevious}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all z-10"
+            aria-label="Previous photo"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={goToNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all z-10"
+            aria-label="Next photo"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          {/* Dots Indicator */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            {photoArray.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  index === currentIndex 
+                    ? 'bg-secondary w-8' 
+                    : 'bg-white/50 hover:bg-white/70'
+                }`}
+                aria-label={`Go to photo ${index + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -102,6 +173,8 @@ const ProjectDetail = () => {
                     allowFullScreen
                   ></iframe>
                 </div>
+              ) : project.photo1 || project.photo2 || project.photo3 ? (
+                <PhotoCarousel photos={project} />
               ) : (
                 <img
                   src={project.thumbnail}
