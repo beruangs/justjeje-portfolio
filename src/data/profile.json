@@ -6,6 +6,8 @@
   "city": "Surakarta, Indonesia",
   "freelance": "Available",
   "profileImage": "https://raw.githubusercontent.com/beruangs/justjeje-imagehost/refs/heads/master/home/profile.PNG",
+  "showreelVideo": "",
+  "showreelVideoComment": "",
   "about": "Saya Janoko Jentayubronto, juga dikenal sebagai Jeje, seorang editor video dan videografer yang berbasis di Surakarta. Saya memiliki lima tahun pengalaman di bidang penyuntingan video dan sinematografi. Saat ini saya sedang menempuh pendidikan Film & Televisi di ISI Surakarta. Saya mahir menggunakan kamera Sony, perangkat lunak Davinci Resolve, dan Adobe Creative Suite. Sebelumnya, saya bekerja di Ceria Production/BMC Production sebagai Sinematografer dan Editor Video. Saya juga magang selama empat bulan di Sinema Warga, sebuah rumah produksi lokal yang berfokus dalam film dokumenter dan penyelenggara pemutaran film (salah satunya Solo Film Festival). Saat ini saya bekerja dengan tim produksi baru, LOWO Pictures, untuk menghasilkan konten yang kreatif dan berkualitas tinggi.",
   "contact": {
     "instagram": "https://instagram.com/justjejee._/",
@@ -23,7 +25,6 @@
     { "name": "Davinci Resolve", "level": 100 },
     { "name": "Adobe Premiere Pro", "level": 100 },
     { "name": "Adobe After Effects", "level": 40 },
-    { "name": "Adobe Photoshop", "level": 70 },
     { "name": "Operating Camera", "level": 100 }
   ],
   "gear": [

@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import portfolioData from '../data/portfolio.json';
+import { getLocalViewCount, formatViewCount } from '../utils/viewCounter';
 
 const Portfolio = () => {
   const [filter, setFilter] = useState('all');
+  const ref = useRef(null);
+  
+  // Parallax effect for the section
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+  
+  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
 
   const filters = [
     { id: 'all', label: 'All' },
@@ -33,8 +43,17 @@ const Portfolio = () => {
   });
 
   return (
-    <section id="portfolio" className="section bg-gray-900">
-      <div className="container-custom px-4">
+    <section ref={ref} id="portfolio" className="section bg-gray-900 relative overflow-hidden">
+      {/* Parallax Background Element */}
+      <motion.div 
+        style={{ y }}
+        className="absolute inset-0 opacity-5 pointer-events-none"
+      >
+        <div className="absolute top-20 left-10 w-96 h-96 bg-secondary rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
+      </motion.div>
+
+      <div className="container-custom px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -132,7 +151,17 @@ const Portfolio = () => {
                     <h3 className="text-lg md:text-xl font-bold text-white mb-2">
                       {project.title}
                     </h3>
-                    <p className="text-xs md:text-sm text-light mb-2">{project.date}</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs md:text-sm text-light">{project.date}</p>
+                      {/* View count indicator */}
+                      <div className="flex items-center gap-1 text-xs text-light/70">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>{formatViewCount(getLocalViewCount(project.id))}</span>
+                      </div>
+                    </div>
                     <span className={`inline-block px-2 md:px-3 py-1 rounded-full text-xs font-semibold ${
                       project.category === 'film' 
                         ? 'bg-red-500 text-white'

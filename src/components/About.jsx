@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import profileData from '../data/profile.json';
 import portfolioData from '../data/portfolio.json';
 
@@ -12,8 +12,13 @@ const About = () => {
   // Count total projects from portfolio
   const totalProjects = portfolioData.length;
 
+  // Parallax effect
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.6]);
+
   return (
-    <section id="about" className="section bg-gray-900">
+    <section id="about" className="section bg-gray-900 relative">
       <div className="container-custom px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -24,9 +29,10 @@ const About = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12 text-white">About</h2>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8 items-start">
-            {/* Profile Image */}
+            {/* Profile Image with Parallax */}
             <motion.div
               className="md:col-span-1 mx-auto md:mx-0 w-full max-w-xs md:max-w-none"
+              style={{ y, opacity }}
               whileHover={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
