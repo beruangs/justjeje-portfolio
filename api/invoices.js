@@ -72,23 +72,39 @@ export default async function handler(req, res) {
     
     // GET single invoice (public)
     else if (req.method === 'GET' && id) {
-      const invoice = await invoices.findOne({ _id: new ObjectId(id) });
-      
-      if (!invoice) {
-        return res.status(404).json({ 
+      try {
+        // Validate ObjectId format
+        if (!ObjectId.isValid(id)) {
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Format ID invoice tidak valid' 
+          });
+        }
+
+        const invoice = await invoices.findOne({ _id: new ObjectId(id) });
+        
+        if (!invoice) {
+          return res.status(404).json({ 
+            success: false, 
+            message: 'Invoice tidak ditemukan' 
+          });
+        }
+
+        res.status(200).json({ 
+          success: true, 
+          data: {
+            ...invoice,
+            id: invoice._id.toString(),
+            _id: undefined
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching invoice:', error);
+        res.status(500).json({ 
           success: false, 
-          message: 'Invoice tidak ditemukan' 
+          message: 'Gagal memuat invoice: ' + error.message 
         });
       }
-
-      res.status(200).json({ 
-        success: true, 
-        data: {
-          ...invoice,
-          id: invoice._id.toString(),
-          _id: undefined
-        }
-      });
     }
     
     // POST create invoice (protected)

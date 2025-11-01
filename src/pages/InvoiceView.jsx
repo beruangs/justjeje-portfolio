@@ -27,11 +27,21 @@ const InvoiceView = () => {
       if (response.success) {
         setInvoice(response.data);
       } else {
-        setError('Invoice tidak ditemukan!');
+        setError(response.message || 'Invoice tidak ditemukan!');
       }
     } catch (error) {
       console.error('Error loading invoice:', error);
-      setError('Gagal memuat invoice. Pastikan backend server sudah running.');
+      
+      // Check if it's a network error or API error
+      if (error.response) {
+        // API returned an error response
+        setError(error.response.data?.message || 'Invoice tidak ditemukan');
+      } else if (error.request) {
+        // Network error - request made but no response
+        setError('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+      } else {
+        setError('Terjadi kesalahan. Silakan coba lagi.');
+      }
     } finally {
       setLoading(false);
     }
