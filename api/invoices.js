@@ -51,47 +51,47 @@ export default async function handler(req, res) {
       try {
         verifyToken(req);
         const allInvoices = await invoices.find({}).sort({ createdAt: -1 }).toArray();
-        
+
         const formatted = allInvoices.map(inv => ({
           ...inv,
           id: inv._id.toString(),
           _id: undefined
         }));
-        
-        res.status(200).json({ 
-          success: true, 
-          data: formatted 
+
+        res.status(200).json({
+          success: true,
+          data: formatted
         });
       } catch (error) {
-        res.status(401).json({ 
-          success: false, 
-          message: 'Unauthorized' 
+        res.status(401).json({
+          success: false,
+          message: 'Unauthorized'
         });
       }
     }
-    
+
     // GET single invoice (public)
     else if (req.method === 'GET' && id) {
       try {
         // Validate ObjectId format
         if (!ObjectId.isValid(id)) {
-          return res.status(400).json({ 
-            success: false, 
-            message: 'Format ID invoice tidak valid' 
+          return res.status(400).json({
+            success: false,
+            message: 'Format ID invoice tidak valid'
           });
         }
 
         const invoice = await invoices.findOne({ _id: new ObjectId(id) });
-        
+
         if (!invoice) {
-          return res.status(404).json({ 
-            success: false, 
-            message: 'Invoice tidak ditemukan' 
+          return res.status(404).json({
+            success: false,
+            message: 'Invoice tidak ditemukan'
           });
         }
 
-        res.status(200).json({ 
-          success: true, 
+        res.status(200).json({
+          success: true,
           data: {
             ...invoice,
             id: invoice._id.toString(),
@@ -100,18 +100,18 @@ export default async function handler(req, res) {
         });
       } catch (error) {
         console.error('Error fetching invoice:', error);
-        res.status(500).json({ 
-          success: false, 
-          message: 'Gagal memuat invoice: ' + error.message 
+        res.status(500).json({
+          success: false,
+          message: 'Gagal memuat invoice: ' + error.message
         });
       }
     }
-    
+
     // POST create invoice (protected)
     else if (req.method === 'POST') {
       try {
         verifyToken(req);
-        
+
         const invoiceData = req.body;
         const subtotal = invoiceData.items.reduce((sum, item) => {
           return sum + (item.quantity * item.price);
@@ -128,8 +128,8 @@ export default async function handler(req, res) {
         const result = await invoices.insertOne(newInvoice);
         const created = await invoices.findOne({ _id: result.insertedId });
 
-        res.status(201).json({ 
-          success: true, 
+        res.status(201).json({
+          success: true,
           message: 'Invoice berhasil dibuat',
           data: {
             ...created,
@@ -141,27 +141,27 @@ export default async function handler(req, res) {
         if (error.message === 'Unauthorized') {
           res.status(401).json({ success: false, message: 'Unauthorized' });
         } else {
-          res.status(500).json({ 
-            success: false, 
+          res.status(500).json({
+            success: false,
             message: 'Gagal membuat invoice',
-            error: error.message 
+            error: error.message
           });
         }
       }
     }
-    
+
     // PUT update invoice (protected)
     else if (req.method === 'PUT' && id) {
       try {
         verifyToken(req);
-        
+
         const invoiceData = req.body;
-        
+
         if (invoiceData.items) {
           const subtotal = invoiceData.items.reduce((sum, item) => {
             return sum + (item.quantity * item.price);
           }, 0);
-          
+
           invoiceData.subtotal = subtotal;
           invoiceData.total = subtotal;
         }
@@ -175,14 +175,14 @@ export default async function handler(req, res) {
         );
 
         if (!result.value) {
-          return res.status(404).json({ 
-            success: false, 
-            message: 'Invoice tidak ditemukan' 
+          return res.status(404).json({
+            success: false,
+            message: 'Invoice tidak ditemukan'
           });
         }
 
-        res.status(200).json({ 
-          success: true, 
+        res.status(200).json({
+          success: true,
           message: 'Invoice berhasil diupdate',
           data: {
             ...result.value,
@@ -194,40 +194,41 @@ export default async function handler(req, res) {
         if (error.message === 'Unauthorized') {
           res.status(401).json({ success: false, message: 'Unauthorized' });
         } else {
-          res.status(500).json({ 
-            success: false, 
+          res.status(500).json({
+            success: false,
             message: 'Gagal mengupdate invoice',
-            error: error.message 
+            error: error.message
           });
         }
       }
     }
-    
+
     // DELETE invoice (protected)
     else if (req.method === 'DELETE' && id) {
       try {
         verifyToken(req);
-        
-        const result = await invoices.deleteOne({ _id: new ObjectId(id) });
+
+        const query = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
+        const result = await invoices.deleteOne(query);
 
         if (result.deletedCount === 0) {
-          return res.status(404).json({ 
-            success: false, 
-            message: 'Invoice tidak ditemukan' 
+          return res.status(404).json({
+            success: false,
+            message: 'Invoice tidak ditemukan'
           });
         }
 
-        res.status(200).json({ 
-          success: true, 
-          message: 'Invoice berhasil dihapus' 
+        res.status(200).json({
+          success: true,
+          message: 'Invoice berhasil dihapus'
         });
       } catch (error) {
         if (error.message === 'Unauthorized') {
           res.status(401).json({ success: false, message: 'Unauthorized' });
         } else {
-          res.status(500).json({ 
-            success: false, 
-            message: 'Gagal menghapus invoice' 
+          res.status(500).json({
+            success: false,
+            message: 'Gagal menghapus invoice'
           });
         }
       }
@@ -237,10 +238,10 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Terjadi kesalahan pada server',
-      error: error.message 
+      error: error.message
     });
   }
 }
