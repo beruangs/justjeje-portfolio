@@ -23,7 +23,7 @@ const InvoiceView = () => {
       setLoading(true);
       setError(null);
       const response = await invoiceAPI.getById(invoiceId);
-      
+
       if (response.success) {
         setInvoice(response.data);
       } else {
@@ -31,7 +31,7 @@ const InvoiceView = () => {
       }
     } catch (error) {
       console.error('Error loading invoice:', error);
-      
+
       // Check if it's a network error or API error
       if (error.response) {
         // API returned an error response
@@ -106,13 +106,13 @@ const InvoiceView = () => {
   const statusBadge = getStatusBadge();
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-[#111827] py-8 text-gray-100">
       {/* Action Buttons */}
       <div className="max-w-4xl mx-auto px-4 mb-4 print:hidden">
         <div className="flex gap-4 justify-between items-center">
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900"
+            className="px-4 py-2 text-gray-400 hover:text-white transition-colors flex items-center gap-2"
           >
             ← Kembali
           </button>
@@ -125,7 +125,7 @@ const InvoiceView = () => {
             </button>
             <button
               onClick={handlePrint}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 transition-colors shadow-lg shadow-green-900/20"
             >
               🖨️ Print / Download PDF
             </button>
@@ -244,7 +244,7 @@ const InvoiceView = () => {
                     <span className="text-gray-700">SUBTOTAL HARGA BARANG</span>
                     <span className="font-semibold">{formatCurrency(invoice.subtotal)}</span>
                   </div>
-                  
+
                   {invoice.paymentStatus === 'DP' && (
                     <>
                       <div className="flex justify-between text-sm border-t pt-2">
@@ -261,7 +261,7 @@ const InvoiceView = () => {
                       </div>
                     </>
                   )}
-                  
+
                   <div className="flex justify-between text-lg font-bold border-t-2 border-gray-300 pt-2">
                     <span>TOTAL TAGIHAN</span>
                     <span>{formatCurrency(invoice.total)}</span>
@@ -298,14 +298,14 @@ const InvoiceView = () => {
                 <p className="mb-1">Invoice ini sah dan diproses oleh komputer</p>
                 <p>Silakan hubungi <strong>Just Jeje</strong> apabila kamu membutuhkan bantuan.</p>
               </div>
-              
+
               {invoice.signature && (
                 <div className="text-center">
                   <p className="text-sm text-gray-600 mb-2">Hormat kami,</p>
                   <div className="relative inline-block">
-                    <img 
-                      src={invoice.signature} 
-                      alt="Signature" 
+                    <img
+                      src={invoice.signature}
+                      alt="Signature"
                       className="h-24 mb-2"
                     />
                     {/* Stempel */}
