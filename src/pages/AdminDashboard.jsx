@@ -9,6 +9,8 @@ const AdminDashboard = () => {
   const [invoices, setInvoices] = useState([]);
   const [projects, setProjects] = useState([]);
   const [activeTab, setActiveTab] = useState('invoices');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [selectedItems, setSelectedItems] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -239,6 +241,56 @@ const AdminDashboard = () => {
     }
   };
 
+  // Bulk Selection Logic
+  const toggleSelect = (id) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(id)) newSelected.delete(id);
+    else newSelected.add(id);
+    setSelectedItems(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedItems.size === projects.length) setSelectedItems(new Set());
+    else setSelectedItems(new Set(projects.map(p => p.id)));
+  };
+
+  const handleBulkDelete = async () => {
+    // For bulk delete, since API doesn't support array delete yet, we loop.
+    // In production app, should add bulk delete endpoint.
+    // Re-using confirm modal logic but with custom action
+    setConfirmState({
+      isOpen: true,
+      type: 'bulk-delete',
+      id: 'bulk',
+      title: `${selectedItems.size} items`
+    });
+  };
+
+  // Upgraded handleFinalConfirm to support bulk
+  const handleFinalConfirm = async () => {
+    if (confirmState.type === 'migrate') {
+      setConfirmState({ isOpen: false, type: null, id: null, title: '' });
+      await startMigrateData();
+    } else if (confirmState.type === 'bulk-delete') {
+      setConfirmState({ isOpen: false, type: null, id: null, title: '' });
+      setLoading(true);
+      try {
+        // Parallel delete requests
+        const deletePromises = Array.from(selectedItems).map(id => portfolioAPI.delete(id));
+        await Promise.all(deletePromises);
+        showToast(`Berhasil menghapus ${selectedItems.size} items`);
+        setSelectedItems(new Set());
+        loadProjects();
+      } catch (err) {
+        showToast('Gagal menghapus beberapa items', 'error');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      await handleConfirmDelete();
+    }
+  };
+
   const handleMigrate = () => {
     // We can use the custom confirm for migrate too, or a specific one.
     // Let's use a specialized check or re-use confirm state with a special type.
@@ -253,13 +305,8 @@ const AdminDashboard = () => {
   };
 
   // Modify handleConfirmDelete to handle migrate
-  const handleFinalConfirm = async () => {
-    if (confirmState.type === 'migrate') {
-      setConfirmState({ isOpen: false, type: null, id: null, title: '' });
-      await startMigrateData();
-    } else {
-      await handleConfirmDelete();
-    }
+  const handleFinalConfirmIsReplacedAbove = async () => {
+    // This function is replaced by the one above in the react component scope
   };
 
   const handleLogout = () => {
@@ -403,78 +450,191 @@ const AdminDashboard = () => {
         {/* --- PORTFOLIO SECTION (REDESIGNED) --- */}
         {activeTab === 'projects' && !loading && (
           <>
-            <div className="flex flex-wrap justify-between items-center gap-4 mb-8 bg-[#1f2937] p-6 rounded-2xl border border-gray-700 shadow-xl">
+            <div className="flex flex-wrap justify-between items-center gap-4 mb-4 bg-[#1f2937] p-6 rounded-2xl border border-gray-700 shadow-xl">
               <div>
                 <h2 className="text-2xl font-bold text-white mb-1">Portfolio Gallery</h2>
                 <p className="text-gray-400 text-sm">Manage your creative works seamlessly.</p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 items-center">
+                {/* View Toggles */}
+                <div className="bg-gray-800 p-1 rounded-lg border border-gray-600 flex mr-2">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-gray-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-gray-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                  </button>
+                </div>
+
+                <div className="h-8 w-px bg-gray-600 mx-1"></div>
+
                 <button
                   onClick={handleMigrate}
-                  className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl border border-gray-600 transition-all text-sm font-medium flex items-center gap-2"
+                  className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600 text-white rounded-xl border border-gray-600 transition-all text-sm font-medium flex items-center gap-2"
                 >
-                  🔄 Sync Legacy Data
+                  🔄 Sync
                 </button>
                 <button
                   onClick={() => setShowAddProject(true)}
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-600/20 transition-all font-semibold flex items-center gap-2"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-600/20 transition-all font-semibold flex items-center gap-2 text-sm"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                  Upload New Project
+                  Upload
                 </button>
               </div>
             </div>
 
-            {/* Grid Layout for Projects */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {projects.map(project => (
-                <div key={project.id} className="group bg-[#1f2937] rounded-2xl border border-gray-700 overflow-hidden hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 relative flex flex-col">
-                  {/* Thumbnail Area */}
-                  <div className="relative h-48 overflow-hidden bg-gray-900">
-                    <img
-                      src={project.thumbnail}
-                      alt={project.title}
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1f2937] via-transparent to-transparent opacity-80" />
-                    {project.pinned === 'yes' && (
-                      <span className="absolute top-3 right-3 bg-yellow-500 text-black text-[10px] font-black px-2 py-1 rounded shadow-lg uppercase tracking-wider">
-                        ★ Pinned
+            {/* Bulk Actions Panel */}
+            {selectedItems.size > 0 && (
+              <div className="bg-blue-900/30 border border-blue-500/30 p-3 rounded-xl mb-6 flex justify-between items-center animate-in fade-in slide-in-from-top-2">
+                <span className="text-blue-200 font-medium ml-2">{selectedItems.size} Selected</span>
+                <button
+                  onClick={handleBulkDelete}
+                  className="px-4 py-1.5 bg-red-500/80 hover:bg-red-600 text-white text-sm font-bold rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  Delete Selected
+                </button>
+              </div>
+            )}
+
+            {/* --- GRID VIEW --- */}
+            {viewMode === 'grid' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {projects.map(project => (
+                  <div key={project.id}
+                    className={`group bg-[#1f2937] rounded-2xl border overflow-hidden hover:shadow-2xl transition-all duration-300 relative flex flex-col ${selectedItems.has(project.id) ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-700 hover:border-blue-500/50'}`}
+                  >
+                    {/* Checkbox Overlay */}
+                    <div className="absolute top-3 left-3 z-20">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(project.id)}
+                        onChange={() => toggleSelect(project.id)}
+                        className="w-5 h-5 rounded border-gray-500 bg-gray-800/80 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Thumbnail Area */}
+                    <div className="relative h-48 overflow-hidden bg-gray-900" onClick={() => toggleSelect(project.id)}>
+                      <img
+                        src={project.thumbnail}
+                        alt={project.title}
+                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#1f2937] via-transparent to-transparent opacity-80" />
+                      {project.pinned === 'yes' && (
+                        <span className="absolute top-3 right-3 bg-yellow-500 text-black text-[10px] font-black px-2 py-1 rounded shadow-lg uppercase tracking-wider">
+                          ★ Pinned
+                        </span>
+                      )}
+                      <span className={`absolute bottom-3 right-3 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border pointer-events-none ${project.category === 'film'
+                        ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                        : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                        }`}>
+                        {project.category}
                       </span>
-                    )}
-                    <span className={`absolute top-3 left-3 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${project.category === 'film'
-                      ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                      : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                      }`}>
-                      {project.category}
-                    </span>
-                  </div>
-
-                  {/* Content Area */}
-                  <div className="p-5 flex-grow flex flex-col justify-between">
-                    <div>
-                      <h4 className="text-lg font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-400 transition-colors">
-                        {project.title}
-                      </h4>
-                      <p className="text-xs text-gray-400 mb-4 line-clamp-2">
-                        {project.description || `${project.date} • ${project.projectInfo?.role || 'No role specified'}`}
-                      </p>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-700/50 flex justify-between items-center">
-                      <span className="text-[10px] uppercase font-bold text-gray-500">ID: {project.id}</span>
-                      <button
-                        onClick={() => openDeleteConfirm('project', project.id, project.title)}
-                        className="text-gray-400 hover:text-red-400 text-xs font-semibold flex items-center gap-1 transition-colors px-2 py-1 hover:bg-red-500/10 rounded"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        Delete
-                      </button>
+                    {/* Content Area */}
+                    <div className="p-5 flex-grow flex flex-col justify-between">
+                      <div>
+                        <h4 className="text-lg font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-400 transition-colors">
+                          {project.title}
+                        </h4>
+                        <p className="text-xs text-gray-400 mb-4 line-clamp-2">
+                          {project.description || `${project.date} • ${project.projectInfo?.role || 'No role specified'}`}
+                        </p>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-700/50 flex justify-between items-center">
+                        <span className="text-[10px] uppercase font-bold text-gray-500">ID: {project.id}</span>
+                        <button
+                          onClick={() => openDeleteConfirm('project', project.id, project.title)}
+                          className="text-gray-400 hover:text-red-400 text-xs font-semibold flex items-center gap-1 transition-colors px-2 py-1 hover:bg-red-500/10 rounded"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {/* --- LIST VIEW --- */}
+            {viewMode === 'list' && (
+              <div className="bg-[#1f2937] rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                <table className="min-w-full divide-y divide-gray-700">
+                  <thead className="bg-gray-800">
+                    <tr>
+                      <th className="px-4 py-4 w-12 text-center">
+                        <input
+                          type="checkbox"
+                          checked={projects.length > 0 && selectedItems.size === projects.length}
+                          onChange={toggleSelectAll}
+                          className="rounded border-gray-500 bg-gray-700 text-blue-600 focus:ring-blue-500"
+                        />
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-24">Image</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Title / ID</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Category</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-[#1f2937] divide-y divide-gray-700">
+                    {projects.map(project => (
+                      <tr key={project.id} className={`hover:bg-gray-800/50 transition-colors ${selectedItems.has(project.id) ? 'bg-blue-900/10' : ''}`}>
+                        <td className="px-4 py-4 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.has(project.id)}
+                            onChange={() => toggleSelect(project.id)}
+                            className="rounded border-gray-500 bg-gray-700 text-blue-600 focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-12 w-20 rounded bg-gray-800 overflow-hidden">
+                            <img src={project.thumbnail} alt="" className="h-full w-full object-cover" />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-bold text-white">{project.title}</div>
+                          <div className="text-xs text-gray-500 font-mono">{project.id}</div>
+                          {project.pinned === 'yes' && <span className="inline-block mt-1 px-2 py-0.5 bg-yellow-500/20 text-yellow-500 text-[10px] rounded border border-yellow-500/30">PINNED</span>}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${project.category === 'film'
+                            ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                            : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                            }`}>
+                            {project.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-400">{project.date}</td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => openDeleteConfirm('project', project.id, project.title)}
+                            className="text-red-400 hover:text-red-300 p-2 hover:bg-red-500/10 rounded-lg transition-all"
+                            title="Delete"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </>
         )}
 
@@ -682,12 +842,18 @@ const AdminDashboard = () => {
                   <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">
-                  {confirmState.type === 'migrate' ? 'Konfirmasi Migrasi' : 'Hapus Item Ini?'}
+                  {confirmState.type === 'migrate'
+                    ? 'Konfirmasi Migrasi'
+                    : confirmState.type === 'bulk-delete'
+                      ? 'Hapus Item Terpilih'
+                      : 'Hapus Item Ini?'}
                 </h3>
                 <p className="text-gray-400 mb-6">
                   {confirmState.type === 'migrate'
                     ? confirmState.title
-                    : `Anda yakin ingin menghapus "${confirmState.title}"? Tindakan ini tidak dapat dibatalkan.`}
+                    : confirmState.type === 'bulk-delete'
+                      ? `Anda yakin ingin menghapus ${confirmState.title}? Tindakan ini tidak dapat dibatalkan.`
+                      : `Anda yakin ingin menghapus "${confirmState.title}"? Tindakan ini tidak dapat dibatalkan.`}
                 </p>
                 <div className="flex gap-3 justify-center">
                   <button
@@ -696,64 +862,63 @@ const AdminDashboard = () => {
                   >
                     Batal
                   </button>
-                  <button
-                    onClick={handleFinalConfirm}
-                    className={`px-6 py-2.5 text-white rounded-xl font-bold shadow-lg transition-all ${confirmState.type === 'migrate'
-                      ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30'
-                      : 'bg-red-600 hover:bg-red-500 shadow-red-600/30'
-                      }`}
+                  onClick={handleFinalConfirm}
+                  className={`px-6 py-2.5 text-white rounded-xl font-bold shadow-lg transition-all ${confirmState.type === 'migrate'
+                    ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30'
+                    : 'bg-red-600 hover:bg-red-500 shadow-red-600/30'
+                    }`}
                   >
-                    {confirmState.type === 'migrate' ? 'Ya, Sinkronisasi' : 'Ya, Hapus'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* INVOICE MODAL */}
-        {showInvoiceModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-[#1f2937] w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar">
-              <div className="sticky top-0 bg-[#1f2937] p-6 border-b border-gray-700 flex justify-between items-center z-10">
-                <div>
-                  <h3 className="text-xl font-bold text-white">
-                    {currentInvoice?.id ? 'Edit Invoice' : 'Create New Invoice'}
-                  </h3>
-                  <p className="text-sm text-gray-400">Manage billing and payments.</p>
-                </div>
-                <button onClick={() => setShowInvoiceModal(false)} className="bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-all">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  {confirmState.type === 'migrate' ? 'Ya, Sinkronisasi' : 'Ya, Hapus'}
                 </button>
               </div>
+            </div>
+          </div>
+          </div>
+        )}
 
-              <div className="p-6 md:p-8 space-y-8">
-                {/* Form Logic Handled inline for simplicity in this refactor step, typically would be separate component */}
-                <InvoiceModalContent
-                  invoice={currentInvoice}
-                  onClose={() => setShowInvoiceModal(false)}
-                  onSave={() => {
-                    setShowInvoiceModal(false);
-                    loadInvoices();
-                    setSuccessMsg('Invoice berhasil disimpan!');
-                    setTimeout(() => setSuccessMsg(null), 3000);
-                  }}
-                />
+      {/* INVOICE MODAL */}
+      {showInvoiceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#1f2937] w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="sticky top-0 bg-[#1f2937] p-6 border-b border-gray-700 flex justify-between items-center z-10">
+              <div>
+                <h3 className="text-xl font-bold text-white">
+                  {currentInvoice?.id ? 'Edit Invoice' : 'Create New Invoice'}
+                </h3>
+                <p className="text-sm text-gray-400">Manage billing and payments.</p>
               </div>
+              <button onClick={() => setShowInvoiceModal(false)} className="bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-all">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
             </div>
-          </div>
-        )}
 
-        {loading && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-            <div className="bg-gray-800 p-6 rounded-2xl flex items-center gap-4 shadow-2xl">
-              <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-              <span className="text-white font-medium">Processing...</span>
+            <div className="p-6 md:p-8 space-y-8">
+              {/* Form Logic Handled inline for simplicity in this refactor step, typically would be separate component */}
+              <InvoiceModalContent
+                invoice={currentInvoice}
+                onClose={() => setShowInvoiceModal(false)}
+                onSave={() => {
+                  setShowInvoiceModal(false);
+                  loadInvoices();
+                  setSuccessMsg('Invoice berhasil disimpan!');
+                  setTimeout(() => setSuccessMsg(null), 3000);
+                }}
+              />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {loading && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-gray-800 p-6 rounded-2xl flex items-center gap-4 shadow-2xl">
+            <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            <span className="text-white font-medium">Processing...</span>
+          </div>
+        </div>
+      )}
     </div>
+    </div >
   );
 };
 
