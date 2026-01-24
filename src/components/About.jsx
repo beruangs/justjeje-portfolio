@@ -1,16 +1,21 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import profileData from '../data/profile.json';
-import portfolioData from '../data/portfolio.json';
+import { portfolioAPI } from '../utils/api';
 
 const About = () => {
+  const [totalProjects, setTotalProjects] = React.useState(0);
+
+  React.useEffect(() => {
+    portfolioAPI.getAll().then(res => {
+      if (res.success) setTotalProjects(res.data.length);
+    });
+  }, []);
+
   // Calculate years of experience from 2019
   const startYear = 2019;
   const currentYear = new Date().getFullYear();
   const yearsOfExperience = currentYear - startYear;
-
-  // Count total projects from portfolio
-  const totalProjects = portfolioData.length;
 
   // Parallax effect
   const { scrollYProgress } = useScroll();
@@ -123,16 +128,16 @@ const About = () => {
             ].map((stat, index) => (
               <motion.div
                 key={index}
-                className="bg-gray-800 p-4 md:p-6 rounded-lg text-center"
+                className="card p-6 md:p-8 text-center flex flex-col items-center justify-center border-secondary/20"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.2 }}
-                whileHover={{ y: -10, boxShadow: '0 20px 40px rgba(80, 109, 255, 0.3)' }}
+                whileHover={{ y: -10, borderColor: 'rgba(80, 109, 255, 0.5)' }}
               >
-                <div className="text-3xl md:text-4xl mb-2">{stat.icon}</div>
+                <div className="text-4xl md:text-5xl mb-4">{stat.icon}</div>
                 <motion.div
-                  className="text-4xl md:text-5xl font-bold text-secondary mb-2"
+                  className="text-5xl md:text-6xl font-bold text-secondary mb-3"
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
@@ -140,7 +145,7 @@ const About = () => {
                 >
                   {stat.value}+
                 </motion.div>
-                <p className="text-light text-sm md:text-base font-semibold">{stat.label}</p>
+                <p className="text-light text-base md:text-lg font-bold tracking-wide uppercase">{stat.label}</p>
               </motion.div>
             ))}
           </div>

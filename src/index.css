@@ -18,7 +18,25 @@ body {
   font-family: 'Open Sans', sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
+@media (min-width: 1024px) {
+
+  body,
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select {
+    cursor: none !important;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Raleway', sans-serif;
 }
 
@@ -27,12 +45,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .section {
-  padding: 3rem 0;
+  padding: 2.5rem 1rem;
 }
 
 @media (min-width: 768px) {
   .section {
-    padding: 4rem 0;
+    padding: 5rem 2rem;
   }
 }
 
@@ -40,6 +58,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 80rem;
   margin-left: auto;
   margin-right: auto;
+  width: 100%;
 }
 
 .btn-primary {
@@ -57,15 +76,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card {
-  background-color: #1f2937;
-  border-radius: 0.5rem;
+  background-color: #1a2238;
+  /* Slightly darker for more contrast */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
   overflow: hidden;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .card:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-8px);
+  border-color: rgba(80, 109, 255, 0.3);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 /* Custom scrollbar */

@@ -1,7 +1,4 @@
-// Fake Views Seeder
 // Generate initial fake views untuk portfolio items
-
-import portfolioData from '../data/portfolio.json';
 
 /**
  * Generate random number dalam range
@@ -22,29 +19,27 @@ const FAKE_VIEWS_CONFIG = {
 /**
  * Generate fake views untuk semua portfolio items
  */
-export const generateFakeViews = () => {
+export const generateFakeViews = (portfolioData = []) => {
   const fakeViews = {};
-  
+
   portfolioData.forEach(project => {
     let views;
-    
+
     if (project.pinned === 'yes') {
-      // Pinned projects get higher views (7000-10000)
       views = randomInRange(
         FAKE_VIEWS_CONFIG.pinned.min,
         FAKE_VIEWS_CONFIG.pinned.max
       );
     } else {
-      // Regular projects get normal views (500-5000)
       views = randomInRange(
         FAKE_VIEWS_CONFIG.regular.min,
         FAKE_VIEWS_CONFIG.regular.max
       );
     }
-    
+
     fakeViews[project.id] = views;
   });
-  
+
   return fakeViews;
 };
 
@@ -75,19 +70,19 @@ export const generateNewProjectViews = (isPinned = false) => {
 export const seedFakeViews = (force = false) => {
   const STORAGE_KEY = 'portfolio_views';
   const existingViews = localStorage.getItem(STORAGE_KEY);
-  
+
   // Jika sudah ada views dan tidak force, skip seeding
   if (existingViews && !force) {
     console.log('📊 Fake views already seeded. Use force=true to reseed.');
     return JSON.parse(existingViews);
   }
-  
+
   const fakeViews = generateFakeViews();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(fakeViews));
-  
+
   console.log('✅ Fake views seeded successfully!');
   console.table(fakeViews);
-  
+
   return fakeViews;
 };
 
@@ -100,28 +95,28 @@ export const seedFakeViewsToAPI = async () => {
   const fakeViews = generateFakeViews();
   const COUNTAPI_BASE = 'https://api.countapi.xyz';
   const namespace = 'justjeje-portfolio';
-  
+
   console.log('🌐 Seeding fake views to CountAPI...');
-  
+
   const promises = Object.entries(fakeViews).map(async ([projectId, views]) => {
     try {
       // Set value menggunakan CountAPI set endpoint
       const url = `${COUNTAPI_BASE}/set/${namespace}/${projectId}?value=${views}`;
       const response = await fetch(url);
       const data = await response.json();
-      
+
       return { projectId, success: true, views: data.value };
     } catch (error) {
       console.error(`Error seeding ${projectId}:`, error);
       return { projectId, success: false, error };
     }
   });
-  
+
   const results = await Promise.all(promises);
-  
+
   console.log('✅ CountAPI seeding completed!');
   console.table(results);
-  
+
   return results;
 };
 
@@ -133,15 +128,15 @@ export const seedFakeViewsToAPI = async () => {
 export const addFakeViewsForNewProject = (projectId, isPinned = false) => {
   const STORAGE_KEY = 'portfolio_views';
   const existingViews = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  
+
   // Generate views untuk project baru
   const newViews = generateNewProjectViews(isPinned);
   existingViews[projectId] = newViews;
-  
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(existingViews));
-  
+
   console.log(`✅ Added fake views for new project "${projectId}": ${newViews} views`);
-  
+
   return newViews;
 };
 
@@ -152,7 +147,7 @@ export const resetAllViews = () => {
   const STORAGE_KEY = 'portfolio_views';
   localStorage.removeItem(STORAGE_KEY);
   sessionStorage.clear();
-  
+
   console.log('🔄 All views have been reset!');
 };
 
@@ -180,12 +175,12 @@ export const getFakeViewsConfig = () => {
 export const setManualViews = (projectId, views) => {
   const STORAGE_KEY = 'portfolio_views';
   const existingViews = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  
+
   existingViews[projectId] = views;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(existingViews));
-  
+
   console.log(`✅ Set manual views for "${projectId}": ${views} views`);
-  
+
   return views;
 };
 
@@ -194,8 +189,7 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   // Seed fake views jika belum ada
   const hasViews = localStorage.getItem('portfolio_views');
   if (!hasViews) {
-    console.log('🎬 First time loading - seeding fake views...');
-    seedFakeViews();
+    // Auto-seed block removed for cleaner dynamic fetching
   }
 }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import profileData from '../data/profile.json';
+import ParticleCanvas from './ParticleCanvas';
 
 const Hero = () => {
   const [isDesktop, setIsDesktop] = useState(false);
@@ -20,23 +21,23 @@ const Hero = () => {
   // Extract YouTube video ID from URL or use direct ID
   const getYouTubeVideoId = (url) => {
     if (!url) return null;
-    
+
     // If already just an ID (11 characters)
     if (url.length === 11 && !url.includes('/') && !url.includes('.')) {
       return url;
     }
-    
+
     // Extract from various YouTube URL formats
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
       /^([a-zA-Z0-9_-]{11})$/
     ];
-    
+
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match) return match[1];
     }
-    
+
     return null;
   };
 
@@ -49,7 +50,7 @@ const Hero = () => {
       {isDesktop && profileData.showreelVideo && (
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-black/50 z-10"></div>
-          
+
           {/* YouTube Embed */}
           {isYouTube ? (
             <iframe
@@ -78,37 +79,39 @@ const Hero = () => {
 
       {/* Animated Background Pattern - Mobile Only */}
       {!isDesktop && (
-        <div className="absolute inset-0 z-0 opacity-20">
+        <div className="absolute inset-0 z-0 opacity-10">
           <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 25px 25px, rgba(80, 109, 255, 0.2) 2%, transparent 0%), 
-                             radial-gradient(circle at 75px 75px, rgba(58, 70, 114, 0.2) 2%, transparent 0%)`,
-            backgroundSize: '100px 100px'
+            backgroundImage: `linear-gradient(rgba(80, 109, 255, 0.05) 1px, transparent 1px), 
+                             linear-gradient(90deg, rgba(80, 109, 255, 0.05) 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
           }}></div>
         </div>
       )}
 
-      {/* Floating Particles */}
-      <div className="absolute inset-0 z-0">
-        {[...Array(15)].map((_, i) => (
+      {/* Desktop Particle Animation */}
+      {isDesktop && <ParticleCanvas />}
+
+      {/* Floating Blobs (Background) */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {[...Array(isDesktop ? 6 : 3)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute bg-secondary rounded-full opacity-20 blur-xl"
+            className="absolute bg-secondary/10 rounded-full blur-[100px]"
             style={{
-              width: Math.random() * 150 + 80,
-              height: Math.random() * 150 + 80,
+              width: isDesktop ? 400 : 250,
+              height: isDesktop ? 400 : 250,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
             }}
             animate={{
-              y: [0, Math.random() * 100 - 50],
-              x: [0, Math.random() * 100 - 50],
-              scale: [1, Math.random() * 0.5 + 0.8, 1],
+              y: [0, Math.random() * 50 - 25],
+              x: [0, Math.random() * 50 - 25],
             }}
             transition={{
-              duration: Math.random() * 15 + 15,
+              duration: 20 + Math.random() * 10,
               repeat: Infinity,
               repeatType: 'reverse',
-              ease: 'easeInOut',
+              ease: 'linear',
             }}
           />
         ))}
@@ -129,7 +132,7 @@ const Hero = () => {
           >
             Just-Jeje
           </motion.h1>
-          
+
           <motion.p
             className="text-lg sm:text-xl md:text-2xl text-light mb-6 md:mb-8"
             initial={{ opacity: 0 }}

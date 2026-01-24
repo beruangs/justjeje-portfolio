@@ -19,22 +19,23 @@ const Gear = () => {
               {profileData.gear.map((item, index) => (
                 <motion.div
                   key={index}
-                  className="bg-gray-800 rounded-lg p-6 text-center"
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  className="card p-6 md:p-8 text-center flex flex-col items-center justify-center border-secondary/10"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.2 }}
-                  whileHover={{ y: -10, boxShadow: '0 20px 40px rgba(80, 109, 255, 0.3)' }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10, borderColor: 'rgba(80, 109, 255, 0.4)' }}
                 >
                   <motion.img
                     src={item.image}
                     alt={item.name}
-                    className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto mb-3 md:mb-4"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
+                    className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto mb-4 md:mb-6"
+                    whileHover={{ scale: 1.15, rotate: 5 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 10 }}
                   />
-                  <h3 className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">{item.name}</h3>
-                  <p className="text-light text-sm md:text-base">{item.type}</p>
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{item.name}</h3>
+                  <div className="w-10 h-1 bg-secondary rounded-full mb-3"></div>
+                  <p className="text-light font-medium text-sm md:text-base tracking-tight">{item.type}</p>
                 </motion.div>
               ))}
             </div>

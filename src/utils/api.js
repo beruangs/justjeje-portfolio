@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Untuk production di Vercel, gunakan relative path /api
 // Untuk development local, gunakan http://localhost:3001/api
-const API_URL = import.meta.env.VITE_API_URL || 
+const API_URL = import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
 
 // Create axios instance
@@ -45,24 +45,44 @@ export const invoiceAPI = {
     const response = await api.get('/invoices');
     return response.data;
   },
-  
+
   getById: async (id) => {
     const response = await api.get(`/invoices/${id}`);
     return response.data;
   },
-  
+
   create: async (invoiceData) => {
     const response = await api.post('/invoices', invoiceData);
     return response.data;
   },
-  
+
   update: async (id, invoiceData) => {
     const response = await api.put(`/invoices/${id}`, invoiceData);
     return response.data;
   },
-  
+
   delete: async (id) => {
     const response = await api.delete(`/invoices/${id}`);
+    return response.data;
+  },
+};
+
+// Portfolio API
+export const portfolioAPI = {
+  getAll: async () => {
+    const response = await api.get('/portfolio');
+    return response.data;
+  },
+  getById: async (id) => {
+    const response = await api.get(`/portfolio?id=${id}`);
+    return response.data;
+  },
+  create: async (projectData) => {
+    const response = await api.post('/portfolio', projectData);
+    return response.data;
+  },
+  delete: async (id) => {
+    const response = await api.delete(`/portfolio/${id}`);
     return response.data;
   },
 };
@@ -81,7 +101,7 @@ export const calculateInvoiceTotals = (items = []) => {
   const subtotal = items.reduce((sum, item) => {
     return sum + (item.quantity * item.price);
   }, 0);
-  
+
   return {
     subtotal,
     total: subtotal,

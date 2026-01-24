@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import portfolioData from '../data/portfolio.json';
 import SEO from '../components/SEO';
-import { trackProjectView, formatViewCount } from '../utils/viewCounter';
 
 // Carousel Component
 const PhotoCarousel = ({ photos }) => {
@@ -13,13 +11,13 @@ const PhotoCarousel = ({ photos }) => {
   if (photoArray.length === 0) return null;
 
   const goToPrevious = () => {
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? photoArray.length - 1 : prevIndex - 1
     );
   };
 
   const goToNext = () => {
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === photoArray.length - 1 ? 0 : prevIndex + 1
     );
   };
@@ -61,11 +59,10 @@ const PhotoCarousel = ({ photos }) => {
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`h-1.5 md:h-2 rounded-full transition-all ${
-                  index === currentIndex 
-                    ? 'bg-secondary w-6 md:w-8' 
-                    : 'bg-white/50 hover:bg-white/70 w-1.5 md:w-2'
-                }`}
+                className={`h-1.5 md:h-2 rounded-full transition-all ${index === currentIndex
+                  ? 'bg-secondary w-6 md:w-8'
+                  : 'bg-white/50 hover:bg-white/70 w-1.5 md:w-2'
+                  }`}
                 aria-label={`Go to photo ${index + 1}`}
               />
             ))}
@@ -76,29 +73,44 @@ const PhotoCarousel = ({ photos }) => {
   );
 };
 
+import { trackProjectView, formatViewCount } from '../utils/viewCounter';
+import { portfolioAPI } from '../utils/api';
+
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [viewCount, setViewCount] = useState({ local: 0, global: null });
   const [isLoadingViews, setIsLoadingViews] = useState(true);
 
   useEffect(() => {
-    const foundProject = portfolioData.find(p => p.id === id);
-    if (foundProject) {
-      setProject(foundProject);
-      
-      // Track view and get count
-      trackProjectView(id).then((result) => {
-        setViewCount({
-          local: result.local,
-          global: result.global
-        });
-        setIsLoadingViews(false);
-      });
-    } else {
-      navigate('/');
-    }
+    const fetchProject = async () => {
+      try {
+        setLoading(true);
+        const response = await portfolioAPI.getById(id);
+        if (response.success) {
+          setProject(response.data);
+
+          // Track view and get count
+          trackProjectView(id).then((result) => {
+            setViewCount({
+              local: result.local,
+              global: result.global
+            });
+            setIsLoadingViews(false);
+          });
+        } else {
+          navigate('/');
+        }
+      } catch (err) {
+        console.error('Failed to fetch project:', err);
+        navigate('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProject();
   }, [id, navigate]);
 
   if (!project) {
@@ -130,7 +142,7 @@ const ProjectDetail = () => {
 
   return (
     <div className="min-h-screen pt-16 md:pt-20 lg:pl-64">
-      <SEO 
+      <SEO
         title={seoTitle}
         description={seoDescription}
         image={seoImage}
@@ -151,7 +163,7 @@ const ProjectDetail = () => {
               <span>/</span>
               <span className="text-white">{project.title}</span>
             </div>
-            
+
             {/* Pinned Badge */}
             {project.pinned === 'yes' && (
               <motion.div
@@ -204,7 +216,7 @@ const ProjectDetail = () => {
             >
               <div className="bg-gray-800 rounded-lg p-4 md:p-6 lg:sticky lg:top-24">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Project information</h3>
-                
+
                 {/* View Counter */}
                 <div className="mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
                   <div className="flex items-center justify-between">
@@ -246,7 +258,7 @@ const ProjectDetail = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <ul className="space-y-3 md:space-y-4 text-sm md:text-base">
                   {project.projectInfo ? (
                     <>
@@ -307,7 +319,7 @@ const ProjectDetail = () => {
                     whileTap={{ scale: 0.95 }}
                   >
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                     </svg>
                     Watch on YouTube
                   </motion.a>

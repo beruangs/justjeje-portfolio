@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getLocalViews, formatViewCount, getTotalViews } from '../utils/viewCounter';
-import portfolioData from '../data/portfolio.json';
+import { portfolioAPI } from '../utils/api';
 
 const ViewStats = () => {
+  const [projects, setProjects] = useState([]);
   const [stats, setStats] = useState({
     views: {},
     total: 0,
@@ -15,7 +16,10 @@ const ViewStats = () => {
     const loadStats = async () => {
       const localViews = getLocalViews();
       const totals = await getTotalViews();
-      
+      const res = await portfolioAPI.getAll();
+
+      if (res.success) setProjects(res.data);
+
       setStats({
         views: localViews,
         total: totals.local,
@@ -31,7 +35,7 @@ const ViewStats = () => {
   }, []);
 
   // Get projects with view counts
-  const projectsWithViews = portfolioData.map(project => ({
+  const projectsWithViews = projects.map(project => ({
     ...project,
     viewCount: stats.views[project.id] || 0
   }));
@@ -99,21 +103,19 @@ const ViewStats = () => {
             <div className="flex gap-2">
               <button
                 onClick={() => setSortBy('views')}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  sortBy === 'views'
-                    ? 'bg-secondary text-white'
-                    : 'bg-gray-800 text-light hover:bg-primary'
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${sortBy === 'views'
+                  ? 'bg-secondary text-white'
+                  : 'bg-gray-800 text-light hover:bg-primary'
+                  }`}
               >
                 Sort by Views
               </button>
               <button
                 onClick={() => setSortBy('title')}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  sortBy === 'title'
-                    ? 'bg-secondary text-white'
-                    : 'bg-gray-800 text-light hover:bg-primary'
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${sortBy === 'title'
+                  ? 'bg-secondary text-white'
+                  : 'bg-gray-800 text-light hover:bg-primary'
+                  }`}
               >
                 Sort by Title
               </button>
@@ -144,13 +146,12 @@ const ViewStats = () => {
                   <h4 className="text-white font-bold text-lg mb-1">{project.title}</h4>
                   <div className="flex items-center gap-3 text-sm">
                     <span className="text-light">{project.date}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      project.category === 'film' 
-                        ? 'bg-red-500 text-white'
-                        : project.category === 'commission'
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${project.category === 'film'
+                      ? 'bg-red-500 text-white'
+                      : project.category === 'commission'
                         ? 'bg-green-500 text-white'
                         : 'bg-blue-500 text-white'
-                    }`}>
+                      }`}>
                       {project.category.toUpperCase()}
                     </span>
                   </div>
@@ -184,7 +185,7 @@ const ViewStats = () => {
               <div>
                 <h4 className="text-white font-bold mb-2">About View Statistics</h4>
                 <p className="text-light text-sm leading-relaxed">
-                  These statistics are stored locally in your browser. Each unique visitor will have their own count. 
+                  These statistics are stored locally in your browser. Each unique visitor will have their own count.
                   For global view tracking across all visitors, the system uses CountAPI which provides real-time analytics.
                   Views are counted once per browser session to avoid inflating numbers from page refreshes.
                 </p>
