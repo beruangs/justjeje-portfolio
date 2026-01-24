@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { invoiceAPI, portfolioAPI, authAPI, formatCurrency, getPaymentStatusColor } from '../utils/api';
+import { invoiceAPI, portfolioAPI, authAPI, uploadAPI, formatCurrency, getPaymentStatusColor } from '../utils/api';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale/id';
 
@@ -402,6 +402,28 @@ const AdminDashboard = () => {
       id: 'register_passkey',
       title: 'Setup Face ID / Passkey on this device?'
     });
+  };
+
+  const handleFileUpload = async (file, targetField) => {
+    if (!file) return;
+
+    // Check size < 4.5MB (Vercel Blob Limit for serverless is 4.5MB usually)
+    if (file.size > 4.5 * 1024 * 1024) {
+      showToast('File too large (Max 4.5MB)', 'error');
+      return;
+    }
+
+    try {
+      showToast('Uploading...', 'success');
+      const response = await uploadAPI.uploadFile(file);
+      if (response && response.url) {
+        setNewProject(prev => ({ ...prev, [targetField]: response.url }));
+        showToast('Upload successful!', 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Upload failed', 'error');
+    }
   };
 
 
@@ -885,13 +907,24 @@ const AdminDashboard = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Thumbnail URL (Wide)</label>
-                      <input
-                        required
-                        value={newProject.thumbnail}
-                        onChange={e => setNewProject({ ...newProject, thumbnail: e.target.value })}
-                        className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none placeholder-gray-600"
-                        placeholder="https://..."
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          required
+                          value={newProject.thumbnail}
+                          onChange={e => setNewProject({ ...newProject, thumbnail: e.target.value })}
+                          className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none placeholder-gray-600"
+                          placeholder="https://..."
+                        />
+                        <label className="bg-gray-800 border border-gray-700 text-gray-300 hover:text-white px-4 py-3 rounded-xl cursor-pointer hover:bg-gray-700 transition-all flex items-center whitespace-nowrap">
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload(e.target.files[0], 'thumbnail')}
+                          />
+                          Upload
+                        </label>
+                      </div>
                     </div>
 
                     <div>
@@ -994,12 +1027,23 @@ const AdminDashboard = () => {
                     {[1, 2, 3].map((num) => (
                       <div key={num}>
                         <label className="block text-xs text-gray-500 mb-1">Photo URL {num}</label>
-                        <input
-                          value={newProject[`photo${num}`]}
-                          onChange={e => setNewProject({ ...newProject, [`photo${num}`]: e.target.value })}
-                          className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 outline-none"
-                          placeholder={`https://...`}
-                        />
+                        <div className="flex gap-2">
+                          <input
+                            value={newProject[`photo${num}`]}
+                            onChange={e => setNewProject({ ...newProject, [`photo${num}`]: e.target.value })}
+                            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 outline-none"
+                            placeholder={`https://...`}
+                          />
+                          <label className="bg-gray-800 border border-gray-700 text-gray-300 hover:text-white px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-700 transition-all text-sm flex items-center">
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => handleFileUpload(e.target.files[0], `photo${num}`)}
+                            />
+                            ⬆
+                          </label>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1031,8 +1075,8 @@ const AdminDashboard = () => {
             <div className="bg-[#1f2937] w-full max-w-md rounded-2xl shadow-2xl border border-gray-700 overflow-hidden transform transition-all scale-100">
               <div className="p-6 text-center">
                 <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${['migrate', 'logout', 'register_passkey'].includes(confirmState.type)
-                    ? 'bg-blue-500/10'
-                    : 'bg-red-500/10'
+                  ? 'bg-blue-500/10'
+                  : 'bg-red-500/10'
                   }`}>
                   {confirmState.type === 'migrate' ? (
                     <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
@@ -1074,8 +1118,8 @@ const AdminDashboard = () => {
                   <button
                     onClick={handleFinalConfirm}
                     className={`px-6 py-2.5 text-white rounded-xl font-bold shadow-lg transition-all ${['migrate', 'logout', 'register_passkey'].includes(confirmState.type)
-                        ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30'
-                        : 'bg-red-600 hover:bg-red-500 shadow-red-600/30'
+                      ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30'
+                      : 'bg-red-600 hover:bg-red-500 shadow-red-600/30'
                       }`}
                   >
                     {confirmState.type === 'migrate' ? 'Ya, Sinkronisasi'

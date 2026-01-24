@@ -1,5 +1,6 @@
 import express from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
+import { del } from '@vercel/blob';
 
 const router = express.Router();
 async function getDb() {
@@ -64,7 +65,39 @@ router.delete('/', async (req, res) => {
 
         const query = ObjectId.isValid(id) ? { $or: [{ _id: new ObjectId(id) }, { id: id }] } : { id: id };
 
-        await db.collection('projects').deleteOne(query);
+        // Find existing project to get image URLs
+        const project = await db.collection('projects').findOne(query);
+
+        if (project) {
+            // Collect all potential blob URLs to delete
+            const urlsToDelete = [];
+
+            // Check Thumbnail
+            if (project.thumbnail && project.thumbnail.includes('.public.blob.vercel-storage.com')) {
+                urlsToDelete.push(project.thumbnail);
+            }
+            // Check Photos 1-3
+            for (let i = 1; i <= 3; i++) {
+                const photoUrl = project[`photo${i}`];
+                if (photoUrl && photoUrl.includes('.public.blob.vercel-storage.com')) {
+                    urlsToDelete.push(photoUrl);
+                }
+            }
+
+            // Delete blobs if any
+            if (urlsToDelete.length > 0) {
+                try {
+                    await del(urlsToDelete, { token: process.env.BLOB_READ_WRITE_TOKEN });
+                    console.log('Deleted blobs:', urlsToDelete);
+                } catch (blobError) {
+                    console.error('Failed to delete blobs:', blobError);
+                    // Continue to delete db entry anyway
+                }
+            }
+
+            await db.collection('projects').deleteOne(query);
+        }
+
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

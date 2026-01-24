@@ -7,6 +7,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth.js';
 import invoiceRoutes from './routes/invoices.js';
 import portfolioRoutes from './routes/portfolio.js';
+import uploadRoutes from './routes/upload.js';
 
 const app = express();
 
@@ -30,6 +31,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
