@@ -137,6 +137,7 @@ export default async function handler(req, res) {
                 // Normal creation
                 const newProject = {
                     ...projectData,
+                    date: projectData.date || new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
                     createdAt: new Date(),
                     updatedAt: new Date()
                 };
