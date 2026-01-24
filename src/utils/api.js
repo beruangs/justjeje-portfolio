@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 
 // Untuk production di Vercel, gunakan relative path /api
 // Untuk development local, gunakan http://localhost:3001/api
@@ -16,7 +17,7 @@ const api = axios.create({
 // Add token to requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('adminToken');
+    const token = sessionStorage.getItem('adminToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -36,6 +37,20 @@ export const authAPI = {
   verify: async () => {
     const response = await api.get('/auth');
     return response.data;
+  },
+  registerPasskey: async () => {
+    const optionsRes = await api.get('/auth/passkey/register-options');
+    const options = optionsRes.data;
+    const attResp = await startRegistration(options);
+    const verifyRes = await api.post('/auth/passkey/register-verify', attResp);
+    return verifyRes.data;
+  },
+  loginPasskey: async () => {
+    const optionsRes = await api.get('/auth/passkey/auth-options');
+    const options = optionsRes.data;
+    const asseResp = await startAuthentication(options);
+    const verifyRes = await api.post('/auth/passkey/auth-verify', asseResp);
+    return verifyRes.data;
   },
 };
 

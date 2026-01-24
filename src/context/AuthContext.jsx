@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   // Check if user is already logged in
   useEffect(() => {
     const verifyToken = async () => {
-      const token = localStorage.getItem('adminToken');
+      const token = sessionStorage.getItem('adminToken');
       if (token) {
         try {
           const response = await authAPI.verify();
@@ -27,10 +27,10 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
             setUser(response.user);
           } else {
-            localStorage.removeItem('adminToken');
+            sessionStorage.removeItem('adminToken');
           }
         } catch (error) {
-          localStorage.removeItem('adminToken');
+          sessionStorage.removeItem('adminToken');
         }
       }
       setIsLoading(false);
@@ -42,9 +42,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       const response = await authAPI.login(username, password);
-      
+
       if (response.success && response.token) {
-        localStorage.setItem('adminToken', response.token);
+        sessionStorage.setItem('adminToken', response.token);
         setIsAuthenticated(true);
         setUser(response.user);
         return true;
@@ -56,8 +56,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginPasskey = async () => {
+    try {
+      const response = await authAPI.loginPasskey();
+      if (response && response.token) {
+        sessionStorage.setItem('adminToken', response.token);
+        setIsAuthenticated(true);
+        setUser(response.user);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Passkey Login Error:', error);
+      return false;
+    }
+  };
+
   const logout = () => {
-    localStorage.removeItem('adminToken');
+    sessionStorage.removeItem('adminToken');
     setIsAuthenticated(false);
     setUser(null);
   };
@@ -67,6 +83,7 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     user,
     login,
+    loginPasskey,
     logout,
   };
 

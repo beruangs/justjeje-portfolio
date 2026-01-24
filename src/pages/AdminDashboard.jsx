@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { invoiceAPI, portfolioAPI, formatCurrency, getPaymentStatusColor } from '../utils/api';
+import { invoiceAPI, portfolioAPI, authAPI, formatCurrency, getPaymentStatusColor } from '../utils/api';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale/id';
 
@@ -255,6 +255,18 @@ const AdminDashboard = () => {
           loadInvoices();
           showToast('Invoice berhasil dihapus');
         }
+      } else if (confirmState.type === 'logout') {
+        logout();
+        navigate('/');
+      } else if (confirmState.type === 'register_passkey') {
+        try {
+          showToast('Starting Passkey Setup...', 'success');
+          await authAPI.registerPasskey();
+          showToast('Passkey registered successfully! You can now login with Face ID.', 'success');
+        } catch (err) {
+          console.error(err);
+          showToast('Failed to register passkey. Ensure your device supports it.', 'error');
+        }
       }
     } catch (err) {
       console.error(err);
@@ -375,11 +387,23 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    if (window.confirm('Yakin ingin logout?')) {
-      logout();
-      navigate('/');
-    }
+    setConfirmState({
+      isOpen: true,
+      type: 'logout',
+      id: 'logout',
+      title: 'Yakin ingin logout dari sistem?'
+    });
   };
+
+  const handleRegisterPasskey = async () => {
+    setConfirmState({
+      isOpen: true,
+      type: 'register_passkey',
+      id: 'register_passkey',
+      title: 'Setup Face ID / Passkey on this device?'
+    });
+  };
+
 
   const stats = {
     total: invoices.length,
@@ -408,6 +432,13 @@ const AdminDashboard = () => {
               className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all"
             >
               View Site
+            </button>
+            <button
+              onClick={handleRegisterPasskey}
+              className="px-4 py-2 text-sm font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg border border-blue-500/20 transition-all flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.131A8 8 0 008 8m0 0a8 8 0 00-8 8c0 2.472.345 4.865.99 7.131M16 3a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Setup Face ID
             </button>
             <button
               onClick={handleLogout}
@@ -456,58 +487,129 @@ const AdminDashboard = () => {
         )}
 
         {/* --- INVOICE SECTION (KEPT AS IS BUT STYLED) --- */}
+        {/* --- INVOICE SECTION (OVERHAULED) --- */}
         {activeTab === 'invoices' && !loading && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center bg-[#1f2937] p-4 rounded-xl border border-gray-700 search-bar">
-              <input
-                type="text"
-                placeholder="Search invoices..."
-                className="bg-gray-900 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none w-96"
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { label: 'Total Invoices', value: stats.total, color: 'blue', icon: '📋' },
+                { label: 'Lunas', value: stats.lunas, color: 'green', icon: '✅' },
+                { label: 'Down Payment', value: stats.dp, color: 'yellow', icon: '⏳' },
+                { label: 'Belum Lunas', value: stats.belumLunas, color: 'red', icon: '⚠️' }
+              ].map((stat, i) => (
+                <div key={i} className="bg-[#1f2937] p-6 rounded-2xl border border-gray-700 shadow-xl hover:border-gray-600 transition-all group">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-2xl">{stat.icon}</span>
+                    <span className={`text-xs font-bold px-2 py-1 rounded bg-${stat.color}-500/10 text-${stat.color}-400 uppercase`}>
+                      Stats
+                    </span>
+                  </div>
+                  <h4 className="text-gray-400 text-sm font-medium">{stat.label}</h4>
+                  <p className="text-3xl font-bold text-white mt-1 group-hover:scale-105 transition-transform origin-left">{stat.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap justify-between items-center gap-4 bg-[#1f2937] p-6 rounded-2xl border border-gray-700 shadow-xl">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search client or invoice #..."
+                    className="w-full bg-gray-900 border border-gray-700 text-white rounded-xl pl-10 pr-4 py-3 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
               <button
-                onClick={() => navigate('/admin/invoice/new')}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-lg shadow-blue-900/20"
+                onClick={() => handleOpenInvoiceModal()}
+                className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
               >
-                + New Invoice
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                Create Invoice
               </button>
             </div>
 
-            {/* Invoice List (Styled table) */}
-            <div className="bg-[#1f2937] rounded-xl border border-gray-700 overflow-hidden shadow-xl">
-              <table className="min-w-full divide-y divide-gray-700">
-                <thead className="bg-gray-800">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Reference</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Client</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-[#1f2937] divide-y divide-gray-700">
-                  {invoices.filter(inv => inv.clientName?.toLowerCase().includes(searchTerm.toLowerCase())).map((invoice) => (
-                    <tr key={invoice.id} className="hover:bg-gray-800/50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{invoice.invoiceNumber}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{invoice.clientName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">{formatCurrency(invoice.total)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 text-xs font-bold rounded-full ${invoice.paymentStatus === 'LUNAS' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                          invoice.paymentStatus === 'DP' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                            'bg-red-500/20 text-red-400 border border-red-500/30'
-                          }`}>
-                          {invoice.paymentStatus}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right text-sm space-x-3">
-                        <button onClick={() => navigate(`/invoice/${invoice.id}`)} className="text-blue-400 hover:text-blue-300 font-medium">View</button>
-                        <button onClick={() => handleOpenInvoiceModal(invoice.id)} className="text-green-400 hover:text-green-300 font-medium">Edit</button>
-                        <button onClick={() => openDeleteConfirm('invoice', invoice.id, invoice.invoiceNumber)} className="text-red-400 hover:text-red-300 font-medium">Delete</button>
-                      </td>
+            {/* Premium Table View */}
+            <div className="bg-[#1f2937] rounded-2xl border border-gray-700 overflow-hidden shadow-2xl">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-700/50">
+                  <thead className="bg-gray-800/50">
+                    <tr>
+                      <th className="px-8 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Reference</th>
+                      <th className="px-8 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Client</th>
+                      <th className="px-8 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Amount</th>
+                      <th className="px-8 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
+                      <th className="px-8 py-5 text-right text-xs font-bold text-gray-400 uppercase tracking-widest">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700/30">
+                    {invoices.filter(inv =>
+                      inv.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      inv.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+                    ).map((invoice) => (
+                      <tr key={invoice.id} className="hover:bg-gray-800/40 transition-colors group">
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <span className="text-sm font-mono text-blue-400 font-medium">{invoice.invoiceNumber}</span>
+                          <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-tighter">ID: {invoice.id.slice(-8)}</p>
+                        </td>
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <div className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{invoice.clientName}</div>
+                          <div className="text-xs text-gray-500 mt-0.5 line-clamp-1 max-w-xs">{invoice.projectTitle}</div>
+                        </td>
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <div className="text-sm font-black text-white">{formatCurrency(invoice.total)}</div>
+                        </td>
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <span className={`px-4 py-1.5 text-[10px] font-black tracking-widest rounded-lg border shadow-sm ${invoice.paymentStatus === 'LUNAS' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                            invoice.paymentStatus === 'DP' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' :
+                              'bg-red-500/10 text-red-100 border-red-500/30'
+                            }`}>
+                            {invoice.paymentStatus}
+                          </span>
+                        </td>
+                        <td className="px-8 py-6 text-right whitespace-nowrap space-x-2">
+                          <button
+                            onClick={() => navigate(`/invoice/${invoice.id}`)}
+                            className="bg-gray-700/50 hover:bg-gray-600 p-2 rounded-lg text-gray-300 hover:text-white transition-all shadow-sm"
+                            title="View Public Link"
+                          >
+                            <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                          </button>
+                          <button
+                            onClick={() => handleOpenInvoiceModal(invoice.id)}
+                            className="bg-blue-600/10 hover:bg-blue-600 p-2 rounded-lg text-blue-400 hover:text-white transition-all shadow-sm"
+                            title="Edit"
+                          >
+                            <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                          </button>
+                          <button
+                            onClick={() => openDeleteConfirm('invoice', invoice.id, invoice.invoiceNumber)}
+                            className="bg-red-600/10 hover:bg-red-600 p-2 rounded-lg text-red-400 hover:text-white transition-all shadow-sm"
+                            title="Delete"
+                          >
+                            <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {invoices.length === 0 && (
+                <div className="p-20 text-center">
+                  <div className="inline-block p-4 bg-gray-800 rounded-full mb-4">
+                    <svg className="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">No invoices found</h3>
+                  <p className="text-gray-500 mt-2">Get started by creating your first billing.</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -928,22 +1030,39 @@ const AdminDashboard = () => {
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-[#1f2937] w-full max-w-md rounded-2xl shadow-2xl border border-gray-700 overflow-hidden transform transition-all scale-100">
               <div className="p-6 text-center">
-                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${['migrate', 'logout', 'register_passkey'].includes(confirmState.type)
+                    ? 'bg-blue-500/10'
+                    : 'bg-red-500/10'
+                  }`}>
+                  {confirmState.type === 'migrate' ? (
+                    <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  ) : ['logout', 'register_passkey'].includes(confirmState.type) ? (
+                    <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  ) : (
+                    <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  )}
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">
                   {confirmState.type === 'migrate'
                     ? 'Konfirmasi Migrasi'
-                    : confirmState.type === 'bulk-delete'
-                      ? 'Hapus Item Terpilih'
-                      : 'Hapus Item Ini?'}
+                    : confirmState.type === 'logout'
+                      ? 'Konfirmasi Logout'
+                      : confirmState.type === 'register_passkey'
+                        ? 'Setup Keamanan'
+                        : confirmState.type === 'bulk-delete'
+                          ? 'Hapus Item Terpilih'
+                          : 'Hapus Item Ini?'}
                 </h3>
-                <p className="text-gray-400 mb-6">
+                <p className="text-gray-400 mb-6 px-4">
                   {confirmState.type === 'migrate'
                     ? confirmState.title
-                    : confirmState.type === 'bulk-delete'
-                      ? `Anda yakin ingin menghapus ${confirmState.title}? Tindakan ini tidak dapat dibatalkan.`
-                      : `Anda yakin ingin menghapus "${confirmState.title}"? Tindakan ini tidak dapat dibatalkan.`}
+                    : confirmState.type === 'logout'
+                      ? 'Apakah Anda yakin ingin keluar dari sistem admin?'
+                      : confirmState.type === 'register_passkey'
+                        ? 'Sistem akan mendaftarkan perangkat ini (Face ID / Touch ID) untuk keamanan akun Anda.'
+                        : confirmState.type === 'bulk-delete'
+                          ? `Anda yakin ingin menghapus ${confirmState.title}? Tindakan ini tidak dapat dibatalkan.`
+                          : `Anda yakin ingin menghapus "${confirmState.title}"? Tindakan ini tidak dapat dibatalkan.`}
                 </p>
                 <div className="flex gap-3 justify-center">
                   <button
@@ -954,12 +1073,15 @@ const AdminDashboard = () => {
                   </button>
                   <button
                     onClick={handleFinalConfirm}
-                    className={`px-6 py-2.5 text-white rounded-xl font-bold shadow-lg transition-all ${confirmState.type === 'migrate'
-                      ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30'
-                      : 'bg-red-600 hover:bg-red-500 shadow-red-600/30'
+                    className={`px-6 py-2.5 text-white rounded-xl font-bold shadow-lg transition-all ${['migrate', 'logout', 'register_passkey'].includes(confirmState.type)
+                        ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30'
+                        : 'bg-red-600 hover:bg-red-500 shadow-red-600/30'
                       }`}
                   >
-                    {confirmState.type === 'migrate' ? 'Ya, Sinkronisasi' : 'Ya, Hapus'}
+                    {confirmState.type === 'migrate' ? 'Ya, Sinkronisasi'
+                      : confirmState.type === 'logout' ? 'Logout'
+                        : confirmState.type === 'register_passkey' ? 'Lanjutkan Setup'
+                          : 'Ya, Hapus'}
                   </button>
                 </div>
               </div>
@@ -1078,140 +1200,222 @@ const InvoiceModalContent = ({ invoice, onClose, onSave }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 text-gray-300">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-400">Nomor Invoice</label>
-          <input
-            value={formData.invoiceNumber}
-            onChange={handleChange}
-            name="invoiceNumber"
-            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
-            required
-          />
+    <form onSubmit={handleSubmit} className="p-8 space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-500">
+      {/* Group 1: General Info */}
+      <section>
+        <h4 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
+          <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+          General Information
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-800/30 p-6 rounded-2xl border border-gray-700/50">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-widest pl-1">Reference Number</label>
+            <input
+              value={formData.invoiceNumber}
+              onChange={handleChange}
+              name="invoiceNumber"
+              className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3.5 text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all placeholder-gray-600 font-mono"
+              placeholder="e.g. INV/2026/01/001"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-widest pl-1">Issue Date</label>
+            <input
+              type="date"
+              value={formData.invoiceDate}
+              onChange={handleChange}
+              name="invoiceDate"
+              className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3.5 text-white focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+              required
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-400">Tanggal</label>
-          <input
-            type="date"
-            value={formData.invoiceDate}
-            onChange={handleChange}
-            name="invoiceDate"
-            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
-            required
-          />
-        </div>
-      </div>
+      </section>
 
-      <div className="border-t border-gray-700 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-400">Client Name</label>
-          <input
-            value={formData.clientName}
-            onChange={handleChange}
-            name="clientName"
-            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
-            required
-          />
+      {/* Group 2: Client Info */}
+      <section>
+        <h4 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
+          <span className="w-1.5 h-6 bg-purple-600 rounded-full"></span>
+          Client Details
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-800/30 p-6 rounded-2xl border border-gray-700/50">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-widest pl-1">Client Name</label>
+            <input
+              value={formData.clientName}
+              onChange={handleChange}
+              name="clientName"
+              className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3.5 text-white focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+              placeholder="e.g. John Doe / Company Name"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-widest pl-1">Project Title</label>
+            <input
+              value={formData.projectTitle}
+              onChange={handleChange}
+              name="projectTitle"
+              className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3.5 text-white focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+              placeholder="e.g. Short Film - Midnight City"
+              required
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-widest pl-1">Client Address / Billing Details</label>
+            <textarea
+              value={formData.clientAddress}
+              onChange={handleChange}
+              name="clientAddress"
+              rows="3"
+              className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3.5 text-white focus:ring-2 focus:ring-blue-600 outline-none transition-all resize-none"
+              placeholder="e.g. Jalan Sudirman No. 123, Jakarta"
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-400">Project Title</label>
-          <input
-            value={formData.projectTitle}
-            onChange={handleChange}
-            name="projectTitle"
-            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
-            required
-          />
-        </div>
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-2 text-gray-400">Client Address</label>
-          <textarea
-            value={formData.clientAddress}
-            onChange={handleChange}
-            name="clientAddress"
-            rows="2"
-            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
-          />
-        </div>
-      </div>
+      </section>
 
-      {/* Items Section */}
-      <div className="border-t border-gray-700 pt-6">
-        <div className="flex justify-between items-center mb-4">
-          <h4 className="font-bold text-white">Items / Services</h4>
-          <button type="button" onClick={addItem} className="text-sm bg-green-600/20 text-green-400 px-3 py-1 rounded hover:bg-green-600/30 transition">+ Add Item</button>
+      {/* Group 3: Line Items */}
+      <section>
+        <div className="flex justify-between items-center mb-6">
+          <h4 className="text-white font-bold text-lg flex items-center gap-2">
+            <span className="w-1.5 h-6 bg-green-600 rounded-full"></span>
+            Items & Services
+          </h4>
+          <button
+            type="button"
+            onClick={addItem}
+            className="text-xs font-bold bg-green-600/20 text-green-400 border border-green-500/20 px-4 py-2 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-lg shadow-green-900/10 flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+            Add New Item
+          </button>
         </div>
-        <div className="space-y-3">
+
+        <div className="space-y-4">
           {formData.items.map((item, index) => (
-            <div key={index} className="flex gap-3 items-start bg-gray-800/50 p-3 rounded-lg border border-gray-700">
-              <div className="flex-1">
+            <div key={index} className="flex flex-wrap md:flex-nowrap gap-4 items-start bg-gray-800/50 p-5 rounded-2xl border border-gray-700 group hover:border-gray-600 transition-all shadow-lg animate-in zoom-in-95 duration-200">
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-[8px] font-black text-gray-500 uppercase mb-1 tracking-[0.2em]">Service Description</label>
                 <input
-                  placeholder="Description"
+                  placeholder="e.g. Video Editing Service"
                   value={item.description}
                   onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                  className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none py-1 text-sm"
+                  className="w-full bg-transparent border-b border-gray-700 focus:border-blue-500 outline-none py-2 text-white font-medium"
                 />
               </div>
-              <div className="w-20">
+              <div className="w-24">
+                <label className="block text-[8px] font-black text-gray-500 uppercase mb-1 tracking-[0.2em] text-center">Qty</label>
                 <input
                   type="number"
-                  placeholder="Qty"
+                  placeholder="1"
                   value={item.quantity}
                   onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                  className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none py-1 text-sm text-center"
+                  className="w-full bg-transparent border-b border-gray-700 focus:border-blue-500 outline-none py-2 text-white text-center font-bold"
                 />
               </div>
-              <div className="w-32">
+              <div className="w-40">
+                <label className="block text-[8px] font-black text-gray-500 uppercase mb-1 tracking-[0.2em] text-right">Price (IDR)</label>
                 <input
                   type="number"
-                  placeholder="Price"
+                  placeholder="0"
                   value={item.price}
                   onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-                  className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none py-1 text-sm text-right"
+                  className="w-full bg-transparent border-b border-gray-700 focus:border-blue-500 outline-none py-2 text-white text-right font-bold"
                 />
               </div>
-              <button type="button" onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300">✕</button>
+              <div className="w-10 pt-5">
+                {formData.items.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeItem(index)}
+                    className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
-        <div className="mt-4 text-right text-xl font-bold text-blue-400">
-          Total: {formatCurrency(total)}
-        </div>
-      </div>
 
-      <div className="border-t border-gray-700 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-400">Payment Status</label>
-          <select
-            value={formData.paymentStatus}
-            onChange={handleChange}
-            name="paymentStatus"
-            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
-          >
-            <option value="BELUM LUNAS">BELUM LUNAS</option>
-            <option value="DP">DP (Down Payment)</option>
-            <option value="LUNAS">LUNAS</option>
-          </select>
-        </div>
-        {formData.paymentStatus === 'DP' && (
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-400">DP Amount</label>
-            <input
-              type="number"
-              value={formData.dpAmount}
-              onChange={handleChange}
-              name="dpAmount"
-              className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
-            />
+        <div className="mt-8 flex flex-col items-end border-t border-gray-700 pt-6 pr-6">
+          <div className="flex gap-12 text-sm mb-2">
+            <span className="text-gray-500 font-bold uppercase tracking-widest">Subtotal</span>
+            <span className="text-gray-300 font-mono">{formatCurrency(subtotal)}</span>
           </div>
-        )}
-      </div>
+          <div className="flex gap-12 text-2xl">
+            <span className="text-gray-400 font-black uppercase tracking-widest">Total Tagihan</span>
+            <span className="text-blue-500 font-black font-mono">{formatCurrency(total)}</span>
+          </div>
+        </div>
+      </section>
 
-      <div className="flex justify-end gap-3 pt-6 border-t border-gray-700">
-        <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl border border-gray-600 hover:bg-gray-700 transition">Cancel</button>
-        <button type="submit" disabled={loading} className="px-8 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold shadow-lg transition">
-          {loading ? 'Saving...' : 'Save Invoice'}
+      {/* Group 4: Payment Logic */}
+      <section>
+        <h4 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
+          <span className="w-1.5 h-6 bg-yellow-600 rounded-full"></span>
+          Payment & Status
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-800/30 p-6 rounded-2xl border border-gray-700/50">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-widest pl-1">Current Status</label>
+            <select
+              value={formData.paymentStatus}
+              onChange={handleChange}
+              name="paymentStatus"
+              className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3.5 text-white focus:ring-2 focus:ring-blue-600 outline-none transition-all cursor-pointer font-bold"
+            >
+              <option value="BELUM LUNAS">🔴 BELUM LUNAS</option>
+              <option value="DP">🟡 DP (Down Payment)</option>
+              <option value="LUNAS">🟢 LUNAS</option>
+            </select>
+          </div>
+          {formData.paymentStatus === 'DP' && (
+            <div className="animate-in slide-in-from-left-2 duration-300">
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-widest pl-1">DP Amount Received</label>
+              <input
+                type="number"
+                value={formData.dpAmount}
+                onChange={handleChange}
+                name="dpAmount"
+                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3.5 text-blue-400 focus:ring-2 focus:ring-blue-600 outline-none transition-all font-bold"
+                placeholder="0"
+              />
+            </div>
+          )}
+          <div className="md:col-span-2 border-t border-gray-700/30 mt-4 pt-6">
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-widest pl-1 text-yellow-400/80 italic animate-pulse">Signature and digital stamp will be automatically applied based on your profile.</label>
+          </div>
+        </div>
+      </section>
+
+      {/* Form Action */}
+      <div className="flex justify-end gap-4 pt-10 border-t border-gray-700 sticky bottom-0 bg-[#1f2937] pb-4 z-20">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-8 py-3 rounded-xl border border-gray-600 text-gray-400 hover:text-white hover:bg-gray-700 font-bold transition-all"
+        >
+          Discard Changes
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-12 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 transition-all flex items-center gap-3 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+              Processing...
+            </>
+          ) : (
+            <>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+              {formData.id ? 'Update Invoice' : 'Finalize & Save'}
+            </>
+          )}
         </button>
       </div>
     </form>

@@ -73,7 +73,6 @@ const PhotoCarousel = ({ photos }) => {
   );
 };
 
-import { trackProjectView, formatViewCount } from '../utils/viewCounter';
 import { portfolioAPI } from '../utils/api';
 
 const ProjectDetail = () => {
@@ -81,8 +80,7 @@ const ProjectDetail = () => {
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [viewCount, setViewCount] = useState({ local: 0, global: null });
-  const [isLoadingViews, setIsLoadingViews] = useState(true);
+
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -91,15 +89,6 @@ const ProjectDetail = () => {
         const response = await portfolioAPI.getById(id);
         if (response.success) {
           setProject(response.data);
-
-          // Track view and get count
-          trackProjectView(id).then((result) => {
-            setViewCount({
-              local: result.local,
-              global: result.global
-            });
-            setIsLoadingViews(false);
-          });
         } else {
           navigate('/');
         }
@@ -216,48 +205,6 @@ const ProjectDetail = () => {
             >
               <div className="bg-gray-800 rounded-lg p-4 md:p-6 lg:sticky lg:top-24">
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Project information</h3>
-
-                {/* View Counter */}
-                <div className="mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <span className="text-light text-sm">Views</span>
-                    </div>
-                    <div className="text-right">
-                      {isLoadingViews ? (
-                        <div className="animate-pulse">
-                          <div className="h-6 w-12 bg-gray-600 rounded"></div>
-                        </div>
-                      ) : (
-                        <>
-                          {viewCount.global !== null ? (
-                            <>
-                              <div className="text-2xl font-bold text-white">
-                                {formatViewCount(viewCount.global)}
-                              </div>
-                              <div className="text-xs text-light/70">
-                                {viewCount.global === 1 ? 'view' : 'views'}
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="text-2xl font-bold text-white">
-                                {formatViewCount(viewCount.local)}
-                              </div>
-                              <div className="text-xs text-light/70">
-                                local {viewCount.local === 1 ? 'view' : 'views'}
-                              </div>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
 
                 <ul className="space-y-3 md:space-y-4 text-sm md:text-base">
                   {project.projectInfo ? (

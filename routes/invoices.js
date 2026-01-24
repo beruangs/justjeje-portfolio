@@ -27,20 +27,29 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// GET all invoices (protected)
-router.get('/', authMiddleware, async (req, res) => {
+// GET invoices (Public for single ID via query, Protected for all)
+router.get('/', async (req, res) => {
   try {
+    const { id } = req.query;
+
+    if (id) {
+      // Single ID fetch (Public)
+      const invoice = await Invoice.findById(id);
+      if (!invoice) return res.status(404).json({ success: false, message: 'Invoice tidak ditemukan' });
+      return res.json({ success: true, data: invoice });
+    }
+
+    // Protected: Get all (Requires valid token)
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+    jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key');
+
     const invoices = await Invoice.find().sort({ createdAt: -1 });
-    res.json({
-      success: true,
-      data: invoices
-    });
+    res.json({ success: true, data: invoices });
   } catch (error) {
     console.error('Get invoices error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Gagal mengambil data invoice'
-    });
+    res.status(500).json({ success: false, message: 'Gagal mengambil data' });
   }
 });
 

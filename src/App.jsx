@@ -10,7 +10,6 @@ import InvoiceView from './pages/InvoiceView';
 import ProtectedRoute from './components/ProtectedRoute';
 import CustomCursor from './components/CustomCursor';
 import { AuthProvider } from './context/AuthContext';
-import { seedFakeViews } from './utils/fakeViews';
 import { seedDemoInvoice } from './utils/demoInvoice';
 import { portfolioAPI } from './utils/api';
 import './index.css';
@@ -18,9 +17,6 @@ import './index.css';
 function App() {
   // Seed fake views saat app pertama kali load
   useEffect(() => {
-    portfolioAPI.getAll().then(res => {
-      if (res.success) seedFakeViews(res.data);
-    });
     seedDemoInvoice(); // Auto-seed demo invoice
   }, []);
 
