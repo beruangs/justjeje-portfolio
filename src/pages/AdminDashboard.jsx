@@ -55,6 +55,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    setSearchTerm(''); // Reset search when switching tabs
     if (activeTab === 'invoices') {
       loadInvoices();
     } else {
@@ -82,10 +83,31 @@ const AdminDashboard = () => {
       setError(null);
       const response = await portfolioAPI.getAll();
       if (response.success) {
-        // Sort by createdAt desc, fallback to date string
+        // Helper to parse date (handles Indonesian months)
+        const parseDate = (dateStr) => {
+          if (!dateStr) return new Date(0);
+          // If it's ISO string (createdAt)
+          if (dateStr.includes('T') || dateStr instanceof Date) return new Date(dateStr);
+
+          // Replace Indonesian months
+          const months = {
+            'Januari': 'January', 'Februari': 'February', 'Maret': 'March', 'April': 'April',
+            'Mei': 'May', 'Juni': 'June', 'Juli': 'July', 'Agustus': 'August',
+            'September': 'September', 'Oktober': 'October', 'November': 'November', 'Desember': 'December'
+          };
+          let engDateStr = dateStr;
+          Object.keys(months).forEach(key => {
+            engDateStr = engDateStr.replace(key, months[key]);
+          });
+
+          const d = new Date(engDateStr);
+          return isNaN(d.getTime()) ? new Date(0) : d;
+        };
+
         const sorted = response.data.sort((a, b) => {
-          const dateA = new Date(a.createdAt || a.date);
-          const dateB = new Date(b.createdAt || b.date);
+          // Prioritize createdAt if available and valid
+          const dateA = a.createdAt ? new Date(a.createdAt) : parseDate(a.date);
+          const dateB = b.createdAt ? new Date(b.createdAt) : parseDate(b.date);
           return dateB - dateA;
         });
         setProjects(sorted);
@@ -481,6 +503,22 @@ const AdminDashboard = () => {
                 <h2 className="text-2xl font-bold text-white mb-1">Portfolio Gallery</h2>
                 <p className="text-gray-400 text-sm">Manage your creative works seamlessly.</p>
               </div>
+
+              <div className="flex-1 max-w-md mx-4">
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search projects..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-gray-800 border border-gray-600 text-white rounded-xl pl-10 pr-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+              </div>
+
               <div className="flex gap-3 items-center">
                 {/* View Toggles */}
                 <div className="bg-gray-800 p-1 rounded-lg border border-gray-600 flex mr-2">
@@ -542,7 +580,7 @@ const AdminDashboard = () => {
             {/* --- GRID VIEW --- */}
             {viewMode === 'grid' && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {projects.map(project => (
+                {projects.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()) || p.id.toLowerCase().includes(searchTerm.toLowerCase())).map(project => (
                   <div key={project.id}
                     className={`group bg-[#1f2937] rounded-2xl border overflow-hidden hover:shadow-2xl transition-all duration-300 relative flex flex-col ${selectedItems.has(project.id) ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-700 hover:border-blue-500/50'}`}
                   >
@@ -626,7 +664,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-[#1f2937] divide-y divide-gray-700">
-                    {projects.map(project => (
+                    {projects.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()) || p.id.toLowerCase().includes(searchTerm.toLowerCase())).map(project => (
                       <tr key={project.id} className={`hover:bg-gray-800/50 transition-colors ${selectedItems.has(project.id) ? 'bg-blue-900/10' : ''}`}>
                         <td className="px-4 py-4 text-center">
                           <input
