@@ -254,6 +254,32 @@ const AdminDashboard = () => {
     else setSelectedItems(new Set(projects.map(p => p.id)));
   };
 
+  const selectDuplicates = () => {
+    const seenTitles = new Set();
+    const duplicateIds = new Set();
+
+    // Iterate through projects (which are already sorted newest first or naturally)
+    // We want to keep one instance (preferable the newest? or oldest? user didn't specify, but usually oldest is original)
+    // Actually, if we just migrated, the new ones are at top. If user wants to keep one, let's keep the one that appears first or last?
+    // Let's assume we keep the FIRST one we encounter (newest if sorted by date desc) and mark others as dupes.
+
+    projects.forEach(project => {
+      const normalizedTitle = project.title.toLowerCase().trim();
+      if (seenTitles.has(normalizedTitle)) {
+        duplicateIds.add(project.id);
+      } else {
+        seenTitles.add(normalizedTitle);
+      }
+    });
+
+    if (duplicateIds.size === 0) {
+      showToast('Tidak ada duplikat yang ditemukan', 'success');
+    } else {
+      setSelectedItems(duplicateIds);
+      showToast(`${duplicateIds.size} judul duplikat terpilih`);
+    }
+  };
+
   const handleBulkDelete = async () => {
     // For bulk delete, since API doesn't support array delete yet, we loop.
     // In production app, should add bulk delete endpoint.
@@ -474,12 +500,21 @@ const AdminDashboard = () => {
 
                 <div className="h-8 w-px bg-gray-600 mx-1"></div>
 
-                <button
-                  onClick={handleMigrate}
-                  className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600 text-white rounded-xl border border-gray-600 transition-all text-sm font-medium flex items-center gap-2"
-                >
-                  🔄 Sync
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={selectDuplicates}
+                    className="px-4 py-2 bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-400 border border-yellow-600/50 rounded-xl transition-all text-sm font-medium whitespace-nowrap"
+                    title="Otomatis pilih judul yang sama (sisakan satu)"
+                  >
+                    ⚡ Auto Select Dupes
+                  </button>
+                  <button
+                    onClick={handleMigrate}
+                    className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600 text-white rounded-xl border border-gray-600 transition-all text-sm font-medium flex items-center gap-2"
+                  >
+                    🔄 Sync
+                  </button>
+                </div>
                 <button
                   onClick={() => setShowAddProject(true)}
                   className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-600/20 transition-all font-semibold flex items-center gap-2 text-sm"
