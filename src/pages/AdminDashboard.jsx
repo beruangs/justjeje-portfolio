@@ -100,15 +100,32 @@ const AdminDashboard = () => {
             engDateStr = engDateStr.replace(key, months[key]);
           });
 
-          const d = new Date(engDateStr);
-          return isNaN(d.getTime()) ? new Date(0) : d;
+          // Try parsing standard English date first (e.g. "May 8, 2025")
+          let d = new Date(dateStr);
+          if (!isNaN(d.getTime())) return d;
+
+          // Try parsing replaced Indonsian string
+          d = new Date(engDateStr);
+          if (!isNaN(d.getTime())) return d;
+
+          return new Date(0); // Fallback
         };
 
         const sorted = response.data.sort((a, b) => {
-          // Prioritize createdAt if available and valid
-          const dateA = a.createdAt ? new Date(a.createdAt) : parseDate(a.date);
-          const dateB = b.createdAt ? new Date(b.createdAt) : parseDate(b.date);
-          return dateB - dateA;
+          // Robust sort: use parsed 'date' field manually entered by user as primary truth
+          // 'createdAt' is secondary fallback (e.g. if date text is missing/invalid)
+          const dateA = parseDate(a.date);
+          const dateB = parseDate(b.date);
+
+          // If both have valid dates from text, compare them
+          if (dateA.getTime() !== 0 && dateB.getTime() !== 0) {
+            return dateB - dateA;
+          }
+
+          // Fallback to createdAt if one is invalid
+          const createdA = new Date(a.createdAt || 0);
+          const createdB = new Date(b.createdAt || 0);
+          return createdB - createdA;
         });
         setProjects(sorted);
       }

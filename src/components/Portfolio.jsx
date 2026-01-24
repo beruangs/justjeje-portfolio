@@ -46,7 +46,7 @@ const Portfolio = () => {
     ? projects
     : projects.filter(project => project.category === filter);
 
-  // Sort projects: pinned items first (7 pinned items max usually), then rely on API order (newest first)
+  // Sort projects: pinned items first, then by date descending
   const sortedProjects = [...filteredProjects].sort((a, b) => {
     // Check if items are pinned
     const aPinned = a.pinned === 'yes';
@@ -56,8 +56,33 @@ const Portfolio = () => {
     if (aPinned && !bPinned) return -1;
     if (!aPinned && bPinned) return 1;
 
-    // If both pinned or both not pinned, keep original order (which is newest first from API)
-    return 0;
+    // Helper to parse date (handles Indonesian months)
+    const parseDate = (dateStr) => {
+      if (!dateStr) return new Date(0);
+
+      const months = {
+        'Januari': 'January', 'Februari': 'February', 'Maret': 'March', 'April': 'April',
+        'Mei': 'May', 'Juni': 'June', 'Juli': 'July', 'Agustus': 'August',
+        'September': 'September', 'Oktober': 'October', 'November': 'November', 'Desember': 'December'
+      };
+
+      // Try standard parse first
+      let d = new Date(dateStr);
+      if (!isNaN(d.getTime())) return d;
+
+      // Try replaced months
+      let engDateStr = dateStr;
+      Object.keys(months).forEach(key => {
+        engDateStr = engDateStr.replace(key, months[key]);
+      });
+      d = new Date(engDateStr);
+      return isNaN(d.getTime()) ? new Date(0) : d;
+    };
+
+    const dateA = parseDate(a.date);
+    const dateB = parseDate(b.date);
+
+    return dateB - dateA;
   });
 
   return (
