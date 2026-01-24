@@ -158,12 +158,15 @@ export default async function handler(req, res) {
         else if (req.method === 'DELETE' && id) {
             try {
                 verifyToken(req);
-                const result = await projects.deleteOne({
-                    $or: [
-                        { _id: ObjectId.isValid(id) ? new ObjectId(id) : null },
-                        { id: id }
-                    ].filter(q => q !== null)
-                });
+                // Attempt to delete by _id (if valid ObjectId) OR by custom string id
+                const query = ObjectId.isValid(id) ? { $or: [{ _id: new ObjectId(id) }, { id: id }] } : { id: id };
+
+                const result = await projects.deleteOne(query);
+
+                if (result.deletedCount === 0) {
+                    return res.status(404).json({ success: false, message: 'Project not found' });
+                }
+
                 res.status(200).json({ success: true });
             } catch (authError) {
                 res.status(401).json({ success: false, message: 'Unauthorized' });

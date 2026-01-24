@@ -79,7 +79,15 @@ const AdminDashboard = () => {
       setLoading(true);
       setError(null);
       const response = await portfolioAPI.getAll();
-      if (response.success) setProjects(response.data);
+      if (response.success) {
+        // Sort by createdAt desc, fallback to date string
+        const sorted = response.data.sort((a, b) => {
+          const dateA = new Date(a.createdAt || a.date);
+          const dateB = new Date(b.createdAt || b.date);
+          return dateB - dateA;
+        });
+        setProjects(sorted);
+      }
     } catch (error) {
       console.error('Error loading projects:', error);
       setError('Gagal memuat portfolio.');
