@@ -9,11 +9,27 @@ async function getDb() {
     return client.db('justjeje-portfolio');
 }
 
-// Get all projects
+// Get all projects or single by ID (Query Param support like Vercel)
 router.get('/', async (req, res) => {
     try {
         const db = await getDb();
-        const all = await db.collection('projects').find({}).toArray();
+        const { id } = req.query;
+
+        if (id) {
+            // Single ID fetch
+            let query = {};
+            if (ObjectId.isValid(id)) {
+                query = { $or: [{ _id: new ObjectId(id) }, { id: id }] };
+            } else {
+                query = { id: id };
+            }
+            const project = await db.collection('projects').findOne(query);
+            if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
+            return res.json({ success: true, data: { ...project, id: project._id.toString(), _id: undefined } });
+        }
+
+        // List all
+        const all = await db.collection('projects').find({}).sort({ createdAt: -1 }).toArray();
         res.json({ success: true, data: all.map(p => ({ ...p, id: p._id.toString(), _id: undefined })) });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -36,7 +52,24 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Delete project
+// Delete project (Query Param support like Vercel)
+router.delete('/', async (req, res) => {
+    try {
+        const db = await getDb();
+        const { id } = req.query;
+
+        if (!id) return res.status(400).json({ success: false, message: 'ID required' });
+
+        const query = ObjectId.isValid(id) ? { $or: [{ _id: new ObjectId(id) }, { id: id }] } : { id: id };
+
+        await db.collection('projects').deleteOne(query);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Legacy path param delete
 router.delete('/:id', async (req, res) => {
     try {
         const db = await getDb();

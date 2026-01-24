@@ -47,7 +47,7 @@ export const invoiceAPI = {
   },
 
   getById: async (id) => {
-    const response = await api.get(`/invoices/${id}`);
+    const response = await api.get(`/invoices?id=${id}`);
     return response.data;
   },
 
@@ -57,12 +57,12 @@ export const invoiceAPI = {
   },
 
   update: async (id, invoiceData) => {
-    const response = await api.put(`/invoices/${id}`, invoiceData);
+    const response = await api.put(`/invoices?id=${id}`, invoiceData);
     return response.data;
   },
 
   delete: async (id) => {
-    const response = await api.delete(`/invoices/${id}`);
+    const response = await api.delete(`/invoices?id=${id}`);
     return response.data;
   },
 };
@@ -82,7 +82,7 @@ export const portfolioAPI = {
     return response.data;
   },
   delete: async (id) => {
-    const response = await api.delete(`/portfolio/${id}`);
+    const response = await api.delete(`/portfolio?id=${id}`);
     return response.data;
   },
 };
