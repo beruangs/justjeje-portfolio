@@ -40,6 +40,15 @@ const AdminDashboard = () => {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [currentInvoice, setCurrentInvoice] = useState(null);
 
+  // Custom Confirm & Alert State
+  const [confirmState, setConfirmState] = useState({ isOpen: false, type: null, id: null, title: '' }); // type: 'invoice' | 'project'
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // type: 'success' | 'error'
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
+
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -98,7 +107,7 @@ const AdminDashboard = () => {
       const response = await portfolioAPI.create(projectData);
       if (response.success) {
         setShowAddProject(false);
-        setSuccessMsg('Project berhasil ditambahkan!');
+        showToast('Project berhasil ditambahkan!');
         setNewProject({
           id: '',
           title: '',
@@ -119,10 +128,9 @@ const AdminDashboard = () => {
           }
         });
         loadProjects();
-        setTimeout(() => setSuccessMsg(null), 3000);
       }
     } catch (err) {
-      setError('Gagal menambah project');
+      showToast('Gagal menambah project', 'error');
     } finally {
       setLoading(false);
     }
@@ -178,32 +186,71 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteInvoice = async (id) => {
-    if (window.confirm('Yakin ingin menghapus invoice ini?')) {
-      try {
-        const response = await invoiceAPI.delete(id);
-        if (response.success) loadInvoices();
-      } catch (error) {
-        alert('Gagal menghapus invoice');
+  const openDeleteConfirm = (type, id, title) => {
+    setConfirmState({ isOpen: true, type, id, title });
+  };
+
+  const handleConfirmDelete = async () => {
+    setLoading(true);
+    setConfirmState(prev => ({ ...prev, isOpen: false })); // Close modal immediately to avoid stuck UI, loading handles overlay
+    try {
+      if (confirmState.type === 'project') {
+        const response = await portfolioAPI.delete(confirmState.id);
+        if (response.success) {
+          loadProjects();
+          showToast('Project berhasil dihapus');
+        }
+      } else if (confirmState.type === 'invoice') {
+        const response = await invoiceAPI.delete(confirmState.id);
+        if (response.success) {
+          loadInvoices();
+          showToast('Invoice berhasil dihapus');
+        }
       }
+    } catch (err) {
+      console.error(err);
+      showToast('Gagal menghapus item', 'error');
+    } finally {
+      setLoading(false);
+      setConfirmState({ isOpen: false, type: null, id: null, title: '' });
     }
   };
 
-  const handleMigrate = async () => {
-    if (window.confirm('Ingin merestore postingan dari portfolio.json ke database? Postingan lama tidak akan diduplikasi.')) {
-      try {
-        setLoading(true);
-        const response = await portfolioAPI.create({ action: 'migrate' });
-        if (response.success) {
-          setSuccessMsg(response.message);
-          loadProjects();
-          setTimeout(() => setSuccessMsg(null), 5000);
-        }
-      } catch (err) {
-        setError('Gagal migrasi data');
-      } finally {
-        setLoading(false);
+  const startMigrateData = async () => {
+    try {
+      setLoading(true);
+      const response = await portfolioAPI.create({ action: 'migrate' });
+      if (response.success) {
+        showToast(response.message);
+        loadProjects();
       }
+    } catch (err) {
+      showToast('Gagal migrasi data', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMigrate = () => {
+    // We can use the custom confirm for migrate too, or a specific one.
+    // Let's use a specialized check or re-use confirm state with a special type.
+    // For simplicity, let's keep the confirm modal generic enough?
+    // We'll just set a special type 'migrate'
+    setConfirmState({
+      isOpen: true,
+      type: 'migrate',
+      id: 'migrate',
+      title: 'Semua data dari portfolio.json akan disinkronisasi ke database.'
+    });
+  };
+
+  // Modify handleConfirmDelete to handle migrate
+  const handleFinalConfirm = async () => {
+    if (confirmState.type === 'migrate') {
+      setConfirmState({ isOpen: false, type: null, id: null, title: '' });
+      await startMigrateData();
+    } else {
+      await handleConfirmDelete();
     }
   };
 
@@ -276,16 +323,15 @@ const AdminDashboard = () => {
           </button>
         </div>
 
-        {error && (
-          <div className="bg-red-900/30 border border-red-500/30 text-red-200 px-6 py-4 rounded-xl mb-6 flex justify-between items-center animate-pulse">
-            <span className="flex items-center gap-2">⚠️ {error}</span>
-            <button onClick={() => setError(null)} className="text-sm hover:text-white">Dismiss</button>
-          </div>
-        )}
-
-        {successMsg && (
-          <div className="bg-green-900/30 border border-green-500/30 text-green-200 px-6 py-4 rounded-xl mb-6 flex justify-between items-center">
-            <span className="flex items-center gap-2">✅ {successMsg}</span>
+        {/* CUSTOM ALERT TOAST */}
+        {toast.show && (
+          <div className={`fixed top-4 right-4 z-[60] px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right-full duration-300 border ${toast.type === 'success'
+            ? 'bg-green-900/90 border-green-500 text-green-100'
+            : 'bg-red-900/90 border-red-500 text-red-100'
+            }`}>
+            <span className="text-xl">{toast.type === 'success' ? '✅' : '⚠️'}</span>
+            <p className="font-medium">{toast.message}</p>
+            <button onClick={() => setToast({ show: false, message: '', type: 'success' })} className="ml-4 hover:opacity-75">✕</button>
           </div>
         )}
 
@@ -335,7 +381,8 @@ const AdminDashboard = () => {
                       </td>
                       <td className="px-6 py-4 text-right text-sm space-x-3">
                         <button onClick={() => navigate(`/invoice/${invoice.id}`)} className="text-blue-400 hover:text-blue-300 font-medium">View</button>
-                        <button onClick={() => handleDeleteInvoice(invoice.id)} className="text-red-400 hover:text-red-300 font-medium">Delete</button>
+                        <button onClick={() => handleOpenInvoiceModal(invoice.id)} className="text-green-400 hover:text-green-300 font-medium">Edit</button>
+                        <button onClick={() => openDeleteConfirm('invoice', invoice.id, invoice.invoiceNumber)} className="text-red-400 hover:text-red-300 font-medium">Delete</button>
                       </td>
                     </tr>
                   ))}
@@ -409,7 +456,7 @@ const AdminDashboard = () => {
                     <div className="pt-4 border-t border-gray-700/50 flex justify-between items-center">
                       <span className="text-[10px] uppercase font-bold text-gray-500">ID: {project.id}</span>
                       <button
-                        onClick={() => handleDeleteProject(project.id)}
+                        onClick={() => openDeleteConfirm('project', project.id, project.title)}
                         className="text-gray-400 hover:text-red-400 text-xs font-semibold flex items-center gap-1 transition-colors px-2 py-1 hover:bg-red-500/10 rounded"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -614,6 +661,44 @@ const AdminDashboard = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {confirmState.isOpen && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-[#1f2937] w-full max-w-md rounded-2xl shadow-2xl border border-gray-700 overflow-hidden transform transition-all scale-100">
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {confirmState.type === 'migrate' ? 'Konfirmasi Migrasi' : 'Hapus Item Ini?'}
+                </h3>
+                <p className="text-gray-400 mb-6">
+                  {confirmState.type === 'migrate'
+                    ? confirmState.title
+                    : `Anda yakin ingin menghapus "${confirmState.title}"? Tindakan ini tidak dapat dibatalkan.`}
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => setConfirmState({ isOpen: false, type: null, id: null, title: '' })}
+                    className="px-6 py-2.5 rounded-xl border border-gray-600 text-gray-300 hover:bg-gray-700 font-medium transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleFinalConfirm}
+                    className={`px-6 py-2.5 text-white rounded-xl font-bold shadow-lg transition-all ${confirmState.type === 'migrate'
+                      ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30'
+                      : 'bg-red-600 hover:bg-red-500 shadow-red-600/30'
+                      }`}
+                  >
+                    {confirmState.type === 'migrate' ? 'Ya, Sinkronisasi' : 'Ya, Hapus'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
