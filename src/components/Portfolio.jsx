@@ -46,7 +46,7 @@ const Portfolio = () => {
     ? projects
     : projects.filter(project => project.category === filter);
 
-  // Sort projects: pinned items first, then by date
+  // Sort projects: pinned items first (7 pinned items max usually), then rely on API order (newest first)
   const sortedProjects = [...filteredProjects].sort((a, b) => {
     // Check if items are pinned
     const aPinned = a.pinned === 'yes';
@@ -56,7 +56,7 @@ const Portfolio = () => {
     if (aPinned && !bPinned) return -1;
     if (!aPinned && bPinned) return 1;
 
-    // If both pinned or both not pinned, keep original order
+    // If both pinned or both not pinned, keep original order (which is newest first from API)
     return 0;
   });
 
