@@ -36,6 +36,10 @@ const AdminDashboard = () => {
     }
   });
 
+  // Invoice Modal State
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [currentInvoice, setCurrentInvoice] = useState(null);
+
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -135,6 +139,45 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleOpenInvoiceModal = async (invoiceId = null) => {
+    if (invoiceId) {
+      // Edit Mode
+      setLoading(true);
+      try {
+        const response = await invoiceAPI.getById(invoiceId);
+        if (response.success) {
+          // Format date for input
+          const invoice = response.data;
+          invoice.invoiceDate = format(new Date(invoice.invoiceDate), 'yyyy-MM-dd');
+          setCurrentInvoice(invoice);
+          setShowInvoiceModal(true);
+        }
+      } catch (err) {
+        setError('Gagal memuat invoice');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // New Mode
+      // Generate number logic handled in backend or initial state?
+      // For now let's just open blank
+      const { generateInvoiceNumber } = await import('../utils/api');
+      setCurrentInvoice({
+        invoiceNumber: generateInvoiceNumber(),
+        invoiceDate: format(new Date(), 'yyyy-MM-dd'),
+        clientName: '',
+        clientAddress: '',
+        projectTitle: '',
+        items: [{ description: '', quantity: 1, price: 0 }],
+        paymentStatus: 'BELUM LUNAS',
+        dpAmount: 0,
+        notes: '',
+        signature: null,
+      });
+      setShowInvoiceModal(true);
+    }
+  };
+
   const handleDeleteInvoice = async (id) => {
     if (window.confirm('Yakin ingin menghapus invoice ini?')) {
       try {
@@ -216,8 +259,8 @@ const AdminDashboard = () => {
           <button
             onClick={() => setActiveTab('invoices')}
             className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${activeTab === 'invoices'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+              ? 'bg-blue-600 text-white shadow-lg'
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
               }`}
           >
             📋 Invoices
@@ -225,8 +268,8 @@ const AdminDashboard = () => {
           <button
             onClick={() => setActiveTab('projects')}
             className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${activeTab === 'projects'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+              ? 'bg-blue-600 text-white shadow-lg'
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
               }`}
           >
             🎬 Portfolio
@@ -284,8 +327,8 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">{formatCurrency(invoice.total)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 text-xs font-bold rounded-full ${invoice.paymentStatus === 'LUNAS' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                            invoice.paymentStatus === 'DP' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                              'bg-red-500/20 text-red-400 border border-red-500/30'
+                          invoice.paymentStatus === 'DP' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                            'bg-red-500/20 text-red-400 border border-red-500/30'
                           }`}>
                           {invoice.paymentStatus}
                         </span>
@@ -345,8 +388,8 @@ const AdminDashboard = () => {
                       </span>
                     )}
                     <span className={`absolute top-3 left-3 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${project.category === 'film'
-                        ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                        : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                      ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                      : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
                       }`}>
                       {project.category}
                     </span>
@@ -575,6 +618,39 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* INVOICE MODAL */}
+        {showInvoiceModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-[#1f2937] w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar">
+              <div className="sticky top-0 bg-[#1f2937] p-6 border-b border-gray-700 flex justify-between items-center z-10">
+                <div>
+                  <h3 className="text-xl font-bold text-white">
+                    {currentInvoice?.id ? 'Edit Invoice' : 'Create New Invoice'}
+                  </h3>
+                  <p className="text-sm text-gray-400">Manage billing and payments.</p>
+                </div>
+                <button onClick={() => setShowInvoiceModal(false)} className="bg-gray-800 p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-all">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              <div className="p-6 md:p-8 space-y-8">
+                {/* Form Logic Handled inline for simplicity in this refactor step, typically would be separate component */}
+                <InvoiceModalContent
+                  invoice={currentInvoice}
+                  onClose={() => setShowInvoiceModal(false)}
+                  onSave={() => {
+                    setShowInvoiceModal(false);
+                    loadInvoices();
+                    setSuccessMsg('Invoice berhasil disimpan!');
+                    setTimeout(() => setSuccessMsg(null), 3000);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {loading && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
             <div className="bg-gray-800 p-6 rounded-2xl flex items-center gap-4 shadow-2xl">
@@ -585,6 +661,211 @@ const AdminDashboard = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Internal Component for Invoice Form inside Modal
+const InvoiceModalContent = ({ invoice, onClose, onSave }) => {
+  const [formData, setFormData] = useState(invoice);
+  const [loading, setLoading] = useState(false);
+
+  // Calculate totals
+  const subtotal = formData.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+  const total = subtotal;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleItemChange = (index, field, value) => {
+    const newItems = [...formData.items];
+    newItems[index][field] = field === 'description' ? value : parseFloat(value) || 0;
+    setFormData(prev => ({ ...prev, items: newItems }));
+  };
+
+  const addItem = () => {
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, { description: '', quantity: 1, price: 0 }]
+    }));
+  };
+
+  const removeItem = (index) => {
+    if (formData.items.length > 1) {
+      const newItems = formData.items.filter((_, i) => i !== index);
+      setFormData(prev => ({ ...prev, items: newItems }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.clientName || !formData.projectTitle) {
+      alert('Mohon isi nama client dan judul project!');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        ...formData,
+        invoiceDate: new Date(formData.invoiceDate).toISOString(),
+        total: total,
+        subtotal: subtotal,
+        dpAmount: formData.paymentStatus === 'DP' ? parseFloat(formData.dpAmount) : 0,
+      };
+
+      if (formData.id) {
+        await invoiceAPI.update(formData.id, payload);
+      } else {
+        await invoiceAPI.create(payload);
+      }
+      onSave();
+    } catch (error) {
+      alert('Gagal menyimpan invoice');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 text-gray-300">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium mb-2 text-gray-400">Nomor Invoice</label>
+          <input
+            value={formData.invoiceNumber}
+            onChange={handleChange}
+            name="invoiceNumber"
+            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2 text-gray-400">Tanggal</label>
+          <input
+            type="date"
+            value={formData.invoiceDate}
+            onChange={handleChange}
+            name="invoiceDate"
+            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="border-t border-gray-700 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium mb-2 text-gray-400">Client Name</label>
+          <input
+            value={formData.clientName}
+            onChange={handleChange}
+            name="clientName"
+            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2 text-gray-400">Project Title</label>
+          <input
+            value={formData.projectTitle}
+            onChange={handleChange}
+            name="projectTitle"
+            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+            required
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium mb-2 text-gray-400">Client Address</label>
+          <textarea
+            value={formData.clientAddress}
+            onChange={handleChange}
+            name="clientAddress"
+            rows="2"
+            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+          />
+        </div>
+      </div>
+
+      {/* Items Section */}
+      <div className="border-t border-gray-700 pt-6">
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="font-bold text-white">Items / Services</h4>
+          <button type="button" onClick={addItem} className="text-sm bg-green-600/20 text-green-400 px-3 py-1 rounded hover:bg-green-600/30 transition">+ Add Item</button>
+        </div>
+        <div className="space-y-3">
+          {formData.items.map((item, index) => (
+            <div key={index} className="flex gap-3 items-start bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+              <div className="flex-1">
+                <input
+                  placeholder="Description"
+                  value={item.description}
+                  onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                  className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none py-1 text-sm"
+                />
+              </div>
+              <div className="w-20">
+                <input
+                  type="number"
+                  placeholder="Qty"
+                  value={item.quantity}
+                  onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                  className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none py-1 text-sm text-center"
+                />
+              </div>
+              <div className="w-32">
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={item.price}
+                  onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                  className="w-full bg-transparent border-b border-gray-600 focus:border-blue-500 outline-none py-1 text-sm text-right"
+                />
+              </div>
+              <button type="button" onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300">✕</button>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 text-right text-xl font-bold text-blue-400">
+          Total: {formatCurrency(total)}
+        </div>
+      </div>
+
+      <div className="border-t border-gray-700 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium mb-2 text-gray-400">Payment Status</label>
+          <select
+            value={formData.paymentStatus}
+            onChange={handleChange}
+            name="paymentStatus"
+            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+          >
+            <option value="BELUM LUNAS">BELUM LUNAS</option>
+            <option value="DP">DP (Down Payment)</option>
+            <option value="LUNAS">LUNAS</option>
+          </select>
+        </div>
+        {formData.paymentStatus === 'DP' && (
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-400">DP Amount</label>
+            <input
+              type="number"
+              value={formData.dpAmount}
+              onChange={handleChange}
+              name="dpAmount"
+              className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-600 outline-none"
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-end gap-3 pt-6 border-t border-gray-700">
+        <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl border border-gray-600 hover:bg-gray-700 transition">Cancel</button>
+        <button type="submit" disabled={loading} className="px-8 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold shadow-lg transition">
+          {loading ? 'Saving...' : 'Save Invoice'}
+        </button>
+      </div>
+    </form>
   );
 };
 

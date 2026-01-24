@@ -68,7 +68,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            let allProjects = await projects.find({}).toArray();
+            let allProjects = await projects.find({}).sort({ createdAt: -1 }).toArray();
 
             // Auto-seed if empty
             if (allProjects.length === 0) {
@@ -82,7 +82,7 @@ export default async function handler(req, res) {
                             updatedAt: new Date()
                         }));
                         await projects.insertMany(seeded);
-                        allProjects = await projects.find({}).toArray();
+                        allProjects = await projects.find({}).sort({ createdAt: -1 }).toArray();
                     }
                 } catch (seedError) {
                     console.error('Seeding error:', seedError);
@@ -112,10 +112,10 @@ export default async function handler(req, res) {
 
                         // Get current IDs to avoid duplicates
                         const currentProjects = await projects.find({}).toArray();
-                        const existingIds = currentProjects.map(p => p.id || p._id.toString());
+                        const existingIds = new Set(currentProjects.map(p => p.id || p._id.toString()));
 
                         const newProjects = jsonData
-                            .filter(p => !existingIds.includes(p.id))
+                            .filter(p => !existingIds.has(p.id))
                             .map(p => ({
                                 ...p,
                                 createdAt: new Date(),
