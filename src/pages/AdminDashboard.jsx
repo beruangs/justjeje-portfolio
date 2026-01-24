@@ -12,6 +12,7 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
 
   // New Project Form State
   const [showAddProject, setShowAddProject] = useState(false);
@@ -94,6 +95,24 @@ const AdminDashboard = () => {
         if (response.success) loadInvoices();
       } catch (error) {
         alert('Gagal menghapus invoice');
+      }
+    }
+  };
+
+  const handleMigrate = async () => {
+    if (window.confirm('Ingin merestore postingan dari portfolio.json ke database? Postingan lama tidak akan diduplikasi.')) {
+      try {
+        setLoading(true);
+        const response = await portfolioAPI.create({ action: 'migrate' });
+        if (response.success) {
+          setSuccessMsg(response.message);
+          loadProjects();
+          setTimeout(() => setSuccessMsg(null), 5000);
+        }
+      } catch (err) {
+        setError('Gagal migrasi data');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -223,15 +242,29 @@ const AdminDashboard = () => {
         {/* PORTFOLIO TAB */}
         {activeTab === 'projects' && !loading && (
           <>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
               <h2 className="text-xl font-bold text-gray-900">Portfolio Items</h2>
-              <button
-                onClick={() => setShowAddProject(!showAddProject)}
-                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow transition-all"
-              >
-                {showAddProject ? 'Batal' : '+ Tambah Post Baru'}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleMigrate}
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 shadow transition-all flex items-center gap-2"
+                >
+                  🔄 Sync from JSON
+                </button>
+                <button
+                  onClick={() => setShowAddProject(!showAddProject)}
+                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow transition-all"
+                >
+                  {showAddProject ? 'Batal' : '+ Tambah Post Baru'}
+                </button>
+              </div>
             </div>
+
+            {successMsg && (
+              <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm">
+                {successMsg}
+              </div>
+            )}
 
             {showAddProject && (
               <div className="bg-white rounded-lg shadow p-6 mb-8 border-2 border-green-100">

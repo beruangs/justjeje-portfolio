@@ -98,12 +98,43 @@ export default async function handler(req, res) {
             res.status(200).json({ success: true, data: formatted });
         }
 
-        // POST add project (protected)
+        // POST add project or migrate (protected)
         else if (req.method === 'POST') {
             try {
                 verifyToken(req);
                 const projectData = req.body;
 
+                // SPECIAL ACTION: Migrate from JSON
+                if (projectData.action === 'migrate') {
+                    const jsonPath = path.join(process.cwd(), 'src/data/portfolio.json');
+                    if (fs.existsSync(jsonPath)) {
+                        const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+
+                        // Get current IDs to avoid duplicates
+                        const currentProjects = await projects.find({}).toArray();
+                        const existingIds = currentProjects.map(p => p.id || p._id.toString());
+
+                        const newProjects = jsonData
+                            .filter(p => !existingIds.includes(p.id))
+                            .map(p => ({
+                                ...p,
+                                createdAt: new Date(),
+                                updatedAt: new Date()
+                            }));
+
+                        if (newProjects.length > 0) {
+                            await projects.insertMany(newProjects);
+                        }
+
+                        return res.status(200).json({
+                            success: true,
+                            message: `Berhasil migrasi ${newProjects.length} postingan baru.`
+                        });
+                    }
+                    return res.status(404).json({ success: false, message: 'Source JSON not found' });
+                }
+
+                // Normal creation
                 const newProject = {
                     ...projectData,
                     createdAt: new Date(),
